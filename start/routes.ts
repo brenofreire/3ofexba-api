@@ -23,4 +23,8 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.group(() => {
   Route.post('cadastro', 'Controllers/UsuariosController.cadastro')
   Route.post('login', 'Controllers/UsuariosController.login')
+
+  Route.group(() => {
+    Route.post('mudar-status-usuario', 'Controllers/UsuariosController.mudarStatusUsuario')
+  }).middleware(['authUser', 'authAdmin'])
 })

@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import { getRuleError, roles, gerarTokenJWT } from 'App/Utils/Utils'
+import { getRuleError, roles, gerarTokenJWT, statusUsuario } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsuariosController {
@@ -41,7 +41,9 @@ export default class UsuariosController {
         schema: schema.create({
           email: schema.string({}, [
             rules.exists({
-              table: 'usuarios', column: 'email',
+              table: 'usuarios',
+              column: 'email',
+              where: { status: 1 },
             }),
           ]),
           password: schema.string({}, []),
@@ -63,6 +65,38 @@ export default class UsuariosController {
         return response.badRequest({ error: error.mensagem, code: 'err_0004' })
       }
       return response.badRequest({ error: 'Erro ao fazer login', code: 'err_0005' })
+    }
+  }
+
+  public async mudarStatusUsuario ({ request, response }: HttpContextContract) {
+    try {
+      const dadosAceitarCadastro = await request.validate({
+        schema: schema.create({
+          email: schema.string({}, [
+            rules.exists({
+              table: 'usuarios', column: 'email',
+            }),
+          ]),
+          role: schema.enum(roles),
+          status: schema.enum(statusUsuario),
+        }),
+      })
+
+      await Usuario.query().update({
+        role: dadosAceitarCadastro.role,
+        status: statusUsuario.indexOf(dadosAceitarCadastro.status),
+      }).where({
+        email: dadosAceitarCadastro.email,
+      })
+
+      return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
+    } catch(error) {
+      if (getRuleError(error) === 'exists') {
+        return response.badRequest({ mensagem: 'Email não cadastrado', code: 'err_0007' })
+      } else if(error.mensagem) {
+        return response.badRequest({ error: error.mensagem, code: 'err_0008' })
+      }
+      return response.badRequest({ error: 'Erro ao alterar stauts de usuário', code: 'err_0009' })
     }
   }
 }

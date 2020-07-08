@@ -37,7 +37,7 @@ export default class AuthUser {
         } else if (err) {
           return response(null)
         }
-        return response(decoded.data.user)
+        return response(decoded.data.usuario)
       })
     })
   }
