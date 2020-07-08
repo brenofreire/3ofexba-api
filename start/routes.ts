@@ -27,4 +27,8 @@ Route.group(() => {
   Route.group(() => {
     Route.post('mudar-status-usuario', 'Controllers/UsuariosController.mudarStatusUsuario')
   }).middleware(['authUser', 'authAdmin'])
+
+  Route.group(() => {
+    Route.post('resumo-campanhas', 'Controllers/TarefasController.getResumoCampanhas')
+  }).middleware(['authUser'])
 })

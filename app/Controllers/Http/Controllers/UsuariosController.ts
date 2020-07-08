@@ -13,6 +13,9 @@ export default class UsuariosController {
             rules.email(),
             rules.unique({ table: 'usuarios', column: 'email' }),
           ]),
+          id_demolay: schema.number([
+            rules.unique({ table: 'usuarios', column: 'id_demolay' }),
+          ]),
           password: schema.string(),
           capitulo: schema.number(),
         }),
@@ -28,8 +31,10 @@ export default class UsuariosController {
 
       return response.ok({ mensagem: 'Usuário criado com sucesso', usuario, token })
     } catch (error) {
-      if (getRuleError(error) === 'unique') {
-        return response.badRequest({ mensagem: 'Email já registrado', codigo: 'err_0001' })
+      const [rule, field] = getRuleError(error)
+
+      if (rule === 'unique') {
+        return response.badRequest({ mensagem: `${field} já registrado`, codigo: 'err_0001' })
       }
       return response.badRequest({ error, codigo: 'err_0002' })
     }
@@ -59,8 +64,10 @@ export default class UsuariosController {
         throw { mensagem: 'Credenciais incorretas' }
       }
     } catch (error) {
-      if (getRuleError(error) === 'exists') {
-        return response.badRequest({ mensagem: 'Email não cadastrado', code: 'err_0003' })
+      const [rule, field] = getRuleError(error)
+
+      if (rule === 'exists') {
+        return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0003' })
       } else if(error.mensagem) {
         return response.badRequest({ error: error.mensagem, code: 'err_0004' })
       }
@@ -91,8 +98,10 @@ export default class UsuariosController {
 
       return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
     } catch(error) {
-      if (getRuleError(error) === 'exists') {
-        return response.badRequest({ mensagem: 'Email não cadastrado', code: 'err_0007' })
+      const [rule, field] = getRuleError(error)
+
+      if (rule === 'exists') {
+        return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0007' })
       } else if(error.mensagem) {
         return response.badRequest({ error: error.mensagem, code: 'err_0008' })
       }

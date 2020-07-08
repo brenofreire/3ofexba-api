@@ -4,7 +4,7 @@ export const roles = ['comum', 'diretoria', 'admin']
 export const statusUsuario = ['excluido', 'ativo', 'suspenso']
 
 export const getRuleError = (error) => {
-  return error.messages && error.messages.errors && error.messages.errors[0].rule
+  return error.messages && error.messages.errors && [error.messages.errors[0].rule, error.messages.errors[0].field]
 }
 
 export const gerarTokenJWT = (params: { id, email, capitulo, role, status, password? }) => {
