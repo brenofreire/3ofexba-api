@@ -29,6 +29,7 @@ Route.group(() => {
   }).middleware(['authUser', 'authAdmin'])
 
   Route.group(() => {
-    Route.post('resumo-campanhas', 'Controllers/TarefasController.getResumoCampanhas')
-  }).middleware(['authUser'])
+    Route.get('/:tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
+    Route.get('', 'Controllers/TarefasController.getResumoCampanhas')
+  }).middleware(['authUser']).prefix('campanhas')
 })

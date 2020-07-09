@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { TiposCampanha } from '../Utils/Utils'
 
-export default class TiposTarefa extends BaseModel {
+export default class Campanha extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
@@ -12,7 +13,7 @@ export default class TiposTarefa extends BaseModel {
   public slug: string
 
   @column()
-  public tipo: string
+  public tipo: TiposCampanha
 
   @column()
   public status: number

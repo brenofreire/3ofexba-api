@@ -7,8 +7,9 @@ export default class Tarefas extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.integer('id_tipo_tarefa')
-      table.integer('id_usuario').index('id_usuario_tarefas')
+      table.string('slug_campanha')
+      table.string('tipo_campanha')
+      table.integer('id_demolay').index('id_usuario_tarefas')
       table.integer('capitulo')
       table.integer('status')
 

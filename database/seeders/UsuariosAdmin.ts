@@ -3,14 +3,14 @@ import Usuario from 'App/Models/Usuario'
 
 export default class UsuariosAdminSeeder extends BaseSeeder {
   public async run () {
-    await Usuario.createMany([{
+    await Usuario.updateOrCreateMany('idDemolay', [{
       email: 'breno.loorran@gmail.com',
       password: '123123123',
       capitulo: 99,
       role: 'admin',
       status: 1,
       idDemolay: 38938,
-    }, {
+    },{
       email: 'email@teste.com',
       password: '123123123',
       capitulo: 99,

@@ -1,9 +1,9 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
-import TiposTarefa from 'App/Models/TiposTarefa'
+import Campanha from 'App/Models/Campanha'
 
-export default class TiposTarefaSeeder extends BaseSeeder {
+export default class CampanhasSeeder extends BaseSeeder {
   public async run () {
-    await TiposTarefa.createMany([{
+    await Campanha.updateOrCreateMany('slug', [{
       nome: 'Cerimônia Magna de Iniciação',
       slug: 'iniciacao',
       tipo: 'cnie',
@@ -14,14 +14,19 @@ export default class TiposTarefaSeeder extends BaseSeeder {
       tipo: 'cnie',
       status: 1,
     }, {
+      nome: 'Arrecação de Fundos',
+      slug: 'arrecadacao-fundos',
+      tipo: 'cnie',
+      status: 1,
+    }, {
       nome: 'Relatório DeMolays ativos e Consultores',
       slug: 'relatorio-dms-ativos-consultores',
-      tipo: 'caneta',
+      tipo: 'caneta-ouro',
       status: 1,
     }, {
       nome: 'Relatório semestral tesouraria',
       slug: 'relatorio-semestral-tesouraria',
-      tipo: 'caneta',
+      tipo: 'tesoureiro-ouro',
       status: 1,
     }])
   }

@@ -1,15 +1,15 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class TiposTarefas extends BaseSchema {
-  protected tableName = 'tipos_tarefas'
+export default class Campanhas extends BaseSchema {
+  protected tableName = 'campanhas'
 
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
       table.string('nome')
-      table.string('slug').index('slug_tipo_tarefas')
-      table.string('tipo').index('tipo_tarefas')
+      table.string('slug').index('slug_index_campanha').unique()
+      table.string('tipo').index('tipo_index_camapnha')
       table.integer('status')
 
       table.dateTime('created_at')

@@ -2,6 +2,22 @@ import jwt from 'jsonwebtoken'
 
 export const roles = ['comum', 'diretoria', 'admin']
 export const statusUsuario = ['excluido', 'ativo', 'suspenso']
+export const statusAtividade = [
+  'atividade-nao-formulada', 'atividade-realizada', 'atividade-enviada',
+  'atividade-devolvida', 'atividade-recusada', 'atividade-aprovada',
+]
+export const statusAtividadeLabel = [
+  'Atividade não formulada', 'Atividade realizada', 'Atividade enviada',
+  'Atividade devolvida', 'Atividade recusada', 'Atividade aprovada',
+]
+
+export type TiposCampanha = 'cnie' | 'caneta-ouro' | 'tesoureiro-ouro' | 'hospitaleiro-ouro'
+export const TiposCampanhaEnumReverso = {
+  'cnie': 'CNIE',
+  'caneta-ouro': 'Caneta de Ouro',
+  'tesoureiro-ouro': 'Tesoureiro de Ouro',
+  'hospitaleiro-ouro': 'Hospitaleiro de Ouro',
+}
 
 export const getRuleError = (error) => {
   return error.messages && error.messages.errors && [error.messages.errors[0].rule, error.messages.errors[0].field]
