@@ -16,7 +16,7 @@ export default class UsuariosController {
           id_demolay: schema.number([
             rules.unique({ table: 'usuarios', column: 'id_demolay' }),
           ]),
-          password: schema.string(),
+          password: schema.string({}, [rules.minLength(6)]),
           capitulo: schema.number(),
         }),
       })
@@ -51,7 +51,7 @@ export default class UsuariosController {
               where: { status: 1 },
             }),
           ]),
-          password: schema.string({}, []),
+          password: schema.string({}, [rules.minLength(6)]),
         }),
       })
 
@@ -68,6 +68,9 @@ export default class UsuariosController {
 
       if (error.mensagem) {
         return response.badRequest({ error: error.mensagem, code: 'err_0004' })
+      }
+      if (rule === 'minLength') {
+        return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0003' })
       }
       if (rule === 'exists') {
         return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0003' })
@@ -88,7 +91,7 @@ export default class UsuariosController {
           role: schema.enum(roles),
           status: schema.enum(statusUsuario),
           cargo: schema.enum.optional(cargosEnum),
-          password: schema.string.optional(),
+          password: schema.string.optional({}, [rules.minLength(6)]),
         }),
       })
 
@@ -113,7 +116,7 @@ export default class UsuariosController {
     } catch (error) {
       const [rule, field] = getRuleError(error)
 
-      if (rule === 'enum') {
+      if (rule === 'enum' || rule === 'minLength') {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0016' })
       } else if (rule === 'exists') {
         return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0007' })
