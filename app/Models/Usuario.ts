@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, beforeSave, beforeUpdate } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
+import { Cargos } from 'App/Utils/Utils'
 
 export default class Usuario extends BaseModel {
   @column({ isPrimary: true })
@@ -19,6 +20,9 @@ export default class Usuario extends BaseModel {
   public capitulo: number
 
   @column()
+  public cargo: Cargos
+
+  @column()
   public role: string
 
   @column()
@@ -30,6 +34,7 @@ export default class Usuario extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
+  @beforeUpdate()
   @beforeSave()
   public static async hashPassword (user: Usuario) {
     if (user.$dirty.password) {

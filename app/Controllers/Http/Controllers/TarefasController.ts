@@ -5,7 +5,7 @@ import { TiposCampanhaEnumReverso, statusAtividade, withExtras, statusAtividadeL
 import Tarefa from 'App/Models/Tarefa'
 
 export default class TarefasController {
-  public async getResumoCampanhas({ request, response }: HttpContextContract) {
+  public async getResumoCampanhas ({ request, response }: HttpContextContract) {
     try {
       const campanhas = await Campanha.query().select('*').count('id', 'quantidade').groupBy('tipo')
       const tarefsDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')

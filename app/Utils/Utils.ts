@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-export const roles = ['comum', 'diretoria', 'admin']
+export const roles = ['comum', 'regionais', 'admin']
+
 export const statusUsuario = ['excluido', 'ativo', 'suspenso']
 export const statusAtividade = [
   'atividade-nao-formulada', 'atividade-realizada', 'atividade-enviada',
@@ -10,6 +11,9 @@ export const statusAtividadeLabel = [
   'Atividade não formulada', 'Atividade realizada', 'Atividade enviada',
   'Atividade devolvida', 'Atividade recusada', 'Atividade aprovada',
 ]
+
+export type Cargos = 'mc' | 'esc' | 'tes' | 'hos'
+export const cargosEnum = ['mc', 'esc', 'tes', 'hos']
 
 export type TiposCampanha = 'cnie' | 'caneta-ouro' | 'tesoureiro-ouro' | 'hospitaleiro-ouro'
 export const TiposCampanhaEnumReverso = {

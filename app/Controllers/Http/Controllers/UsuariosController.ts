@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import { getRuleError, roles, gerarTokenJWT, statusUsuario } from 'App/Utils/Utils'
+import { getRuleError, roles, gerarTokenJWT, statusUsuario, cargosEnum } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsuariosController {
@@ -58,7 +58,7 @@ export default class UsuariosController {
       const usuario = await Usuario.query().where({ email: dadosCadastro.email }).firstOrFail()
       const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
 
-      if(senhaCorreta) {
+      if (senhaCorreta) {
         return response.ok({ usuario, token: gerarTokenJWT(usuario) })
       } else {
         throw { mensagem: 'Credenciais incorretas' }
@@ -66,10 +66,11 @@ export default class UsuariosController {
     } catch (error) {
       const [rule, field] = getRuleError(error)
 
+      if (error.mensagem) {
+        return response.badRequest({ error: error.mensagem, code: 'err_0004' })
+      }
       if (rule === 'exists') {
         return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0003' })
-      } else if(error.mensagem) {
-        return response.badRequest({ error: error.mensagem, code: 'err_0004' })
       }
       return response.badRequest({ error: 'Erro ao fazer login', code: 'err_0005' })
     }
@@ -86,23 +87,37 @@ export default class UsuariosController {
           ]),
           role: schema.enum(roles),
           status: schema.enum(statusUsuario),
+          cargo: schema.enum.optional(cargosEnum),
+          password: schema.string.optional(),
         }),
       })
 
-      await Usuario.query().update({
+      const dadosAtualizados = {
         role: dadosAceitarCadastro.role,
         status: statusUsuario.indexOf(dadosAceitarCadastro.status),
-      }).where({
-        email: dadosAceitarCadastro.email,
-      })
+        cargo: dadosAceitarCadastro.cargo,
+        password: dadosAceitarCadastro.password && await Hash.make(<any>dadosAceitarCadastro.password),
+      }
+
+      if (!dadosAtualizados.password) {
+        delete dadosAtualizados.password
+      }
+
+      if (!dadosAtualizados.cargo) {
+        delete dadosAtualizados.cargo
+      }
+
+      await Usuario.query().update(dadosAtualizados).where({ email: dadosAceitarCadastro.email })
 
       return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
-    } catch(error) {
+    } catch (error) {
       const [rule, field] = getRuleError(error)
 
-      if (rule === 'exists') {
+      if (rule === 'enum') {
+        return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0016' })
+      } else if (rule === 'exists') {
         return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0007' })
-      } else if(error.mensagem) {
+      } else if (error.mensagem) {
         return response.badRequest({ error: error.mensagem, code: 'err_0008' })
       }
       return response.badRequest({ error: 'Erro ao alterar stauts de usuário', code: 'err_0009' })

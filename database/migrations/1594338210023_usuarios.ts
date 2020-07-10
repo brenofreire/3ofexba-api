@@ -13,6 +13,7 @@ export default class Usuarios extends BaseSchema {
       table.integer('capitulo')
       table.string('role')
       table.string('status')
+      table.string('cargo')
 
       table.dateTime('created_at')
       table.dateTime('updated_at')

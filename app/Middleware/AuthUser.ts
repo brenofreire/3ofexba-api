@@ -2,6 +2,8 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import jwt from 'jsonwebtoken'
 import Env from '@ioc:Adonis/Core/Env'
+import UsuariosMeta from 'App/Models/UsuariosMeta'
+import { gerarTokenJWT } from 'App/Utils/Utils'
 
 export default class AuthUser {
   public async handle ({ request, response }: HttpContextContract, next: () => Promise<void>) {
@@ -21,6 +23,8 @@ export default class AuthUser {
       } catch (error) {
         return response.forbidden(error)
       }
+    } else if(user.error === 'jwt_expired_token_refreshed') {
+      return response.badRequest(user)
     }
 
     const role = user.role || ''
@@ -43,11 +47,24 @@ export default class AuthUser {
   }
 
   private decodificaTokenExpirado (token) {
-    return new Promise(response => {
-      const error = jwt.decode(token, Env.get('JWT_SECRET'), (err, decoded) => {
+    return new Promise(async response => {
+      const dados = jwt.decode(token, Env.get('JWT_SECRET'), (err, decoded) => {
         return err ? null : decoded.data.user
       })
-      return response({ ...error, error: 'jwt_expired_token' })
+
+      const mudouSenha = await UsuariosMeta.query()
+        .where({meta_key: 'mudou-senha'})
+        .andWhere('meta_value', '>', dados.iat * 1000).first()
+
+      if(mudouSenha) {
+        return response({ error: 'jwt_expired_token' })
+      } else {
+        return response({
+          error: 'jwt_expired_token_refreshed',
+          token: gerarTokenJWT(dados.data.usuario),
+          code: 'err_0015',
+        })
+      }
     })
   }
 }
