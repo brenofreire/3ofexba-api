@@ -34,8 +34,12 @@ Route.group(() => {
   }).middleware(['authUser']).prefix('campanhas')
 
   Route.group(() => {
-    Route.get('ofex', 'Controllers/CapitulosController.getCapitulosOfex')
-    Route.get('', 'Controllers/CapitulosController.buscarCapitulo')
+    Route.post('', 'Controllers/TarefasController.enviarTarefa')
+  }).middleware(['authUser']).prefix('tarefas')
+
+  Route.group(() => {
+    // Route.get('ofex', 'Controllers/CapitulosController.getCapitulosOfex')
+    // Route.get('', 'Controllers/CapitulosController.buscarCapitulo')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
   }).middleware(['authUser']).prefix('capitulos')
 })

@@ -18,6 +18,7 @@ export type Cargos = 'mc' | 'esc' | 'tes' | 'hos'
 export const cargosEnum = ['mc', 'esc', 'tes', 'hos']
 
 export type TiposCampanha = 'cnie' | 'caneta-ouro' | 'tesoureiro-ouro' | 'hospitaleiro-ouro'
+export const TiposCampanhaEnum: TiposCampanha[] = ['cnie', 'caneta-ouro', 'tesoureiro-ouro', 'hospitaleiro-ouro']
 export const TiposCampanhaEnumReverso = {
   'cnie': 'CNIE',
   'caneta-ouro': 'Caneta de Ouro',
@@ -29,7 +30,7 @@ export const getRuleError = (error) => {
   return error.messages && error.messages.errors && [error.messages.errors[0].rule, error.messages.errors[0].field]
 }
 
-export const gerarTokenJWT = (params: { id, email, capitulo, role, status, password? }) => {
+export const gerarTokenJWT = (params: { id, email, capitulo, role, status, password?}) => {
   if (params.password) {
     delete params.password
   }

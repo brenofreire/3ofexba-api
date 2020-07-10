@@ -1,12 +1,12 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Campanha from 'App/Models/Campanha'
-// import { schema } from '@ioc:Adonis/Core/Validator'
 import {
   TiposCampanhaEnumReverso,
   statusAtividade,
   withExtras,
   statusAtividadeLabel,
   getRuleError,
+  TiposCampanhaEnum,
 } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema } from '@ioc:Adonis/Core/Validator'
@@ -99,6 +99,46 @@ export default class TarefasController {
       } else {
         return response.badRequest({ mensagem: 'Houve um erro ao detalhar informações de campanha', code: 'err_0014' })
       }
+    }
+  }
+
+  public async enviarTarefa ({ request, response }: HttpContextContract) {
+    try {
+      const dadosTarefa = await request.validate({
+        schema: schema.create({
+          slugCampanha: schema.string(),
+          tipoCampanha: schema.enum(TiposCampanhaEnum),
+        }),
+        messages: {
+          required: '{{ field }} é obrigatório',
+          enum: '{{ field }} tipo inválido',
+        },
+      })
+
+      const jaExisteTarefa = await Tarefa.query().where({
+        idDemolay: request.input('usuario').id,
+        slugCampanha: dadosTarefa.slugCampanha,
+        tipoCampanha: dadosTarefa.tipoCampanha,
+      }).first()
+
+      if(jaExisteTarefa) {
+        return response.ok({ mensagem: 'Atividade já cadastrada' })
+      } else {
+        await Tarefa.create({
+          slugCampanha: dadosTarefa.slugCampanha,
+          tipoCampanha: dadosTarefa.tipoCampanha,
+          capitulo: request.input('usuario').capitulo,
+          idDemolay: request.input('usuario').id,
+          status: statusAtividade.indexOf('atividade-nao-formulada'),
+        })
+
+        return response.ok({ mensagem: 'Atividade enviada com sucesso' })
+      }
+    } catch (error) {
+      if(error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0019' })
+      }
+      return response.badRequest({ mensagem: 'Houve um erro ao cadastar nova atividade', code: 'err_0020' })
     }
   }
 }
