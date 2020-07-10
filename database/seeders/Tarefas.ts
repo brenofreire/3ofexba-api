@@ -8,25 +8,25 @@ export default class TarefasSeeder extends BaseSeeder {
       capitulo: 99,
       tipoCampanha: 'caneta-ouro',
       slugCampanha: 'relatorio-dms-ativos-consultores',
-      status: statusAtividade.indexOf('atividade-concluida'),
+      status: statusAtividade.indexOf('atividade-aprovada'),
       idDemolay: 5,
     }, {
       capitulo: 99,
       tipoCampanha: 'cnie',
       slugCampanha: 'elevacao',
-      status: statusAtividade.indexOf('atividade-concluida'),
+      status: statusAtividade.indexOf('atividade-aprovada'),
       idDemolay: 5,
     }, {
       capitulo: 99,
       tipoCampanha: 'cnie',
       slugCampanha: 'iniciacao',
-      status: statusAtividade.indexOf('atividade-concluida'),
+      status: statusAtividade.indexOf('atividade-aprovada'),
       idDemolay: 4,
     }, {
       capitulo: 772,
       tipoCampanha: 'cnie',
       slugCampanha: 'iniciacao',
-      status: statusAtividade.indexOf('atividade-concluida'),
+      status: statusAtividade.indexOf('atividade-aprovada'),
       idDemolay: 2,
     }])
   }

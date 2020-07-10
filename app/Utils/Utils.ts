@@ -1,9 +1,11 @@
 import jwt from 'jsonwebtoken'
 
 export const roles = ['comum', 'regionais', 'admin']
-
 export const statusUsuario = ['excluido', 'ativo', 'suspenso']
-export const statusAtividade = [
+
+type StatusAvidadesInterface = 'atividade-nao-formulada' | 'atividade-realizada' | 'atividade-enviada' |
+'atividade-devolvida' | 'atividade-recusada' | 'atividade-aprovada'
+export const statusAtividade: StatusAvidadesInterface[] = [
   'atividade-nao-formulada', 'atividade-realizada', 'atividade-enviada',
   'atividade-devolvida', 'atividade-recusada', 'atividade-aprovada',
 ]
