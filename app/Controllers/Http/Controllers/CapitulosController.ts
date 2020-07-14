@@ -28,7 +28,38 @@ export default class CapitulosController {
       if(error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0019' })
       }
-      return response.badRequest({ error, codigo: 'err_0018' })
+      return response.badRequest({
+        mensagem: 'Erro ao cadasrtrar capítulo, tente novamente mais tarde',
+        codigo: 'err_0018',
+      })
+    }
+  }
+
+  public async buscarCapitulo ({ request, response }: HttpContextContract) {
+    try {
+      const dadosBusca = await request.validate({
+        schema: schema.create({
+          ofex: schema.number(),
+          termoBusca: schema.string.optional(),
+        }),
+        messages: { 'ofex.required': 'O número da Ofex é obrigatório' },
+      })
+
+      const capitulos = await Capitulo.query()
+        .where(q => {
+          if(dadosBusca.termoBusca) {
+            q.whereRaw(`LOWER(nome) LIKE '%${dadosBusca.termoBusca}%'`)
+            q.orWhereRaw(`LOWER(sigla) LIKE '%${dadosBusca.termoBusca}%'`)
+          }
+        })
+        .andWhere({ ofex: dadosBusca.ofex })
+
+      return response.ok(capitulos)
+    } catch (error) {
+      if(error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0022' })
+      }
+      return response.badRequest({ mensagem: 'Erro ao buscar capítulos', code: 'err_0021' })
     }
   }
 }
