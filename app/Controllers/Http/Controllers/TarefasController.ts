@@ -9,10 +9,10 @@ import {
   TiposCampanhaEnum,
 } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
-import { schema } from '@ioc:Adonis/Core/Validator'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class TarefasController {
-  public async getResumoCampanhas ({ request, response }: HttpContextContract) {
+  public async getResumoCampanhas({ request, response }: HttpContextContract) {
     try {
       let validacaoResumo: any = {}
       if (request.input('usuario').role === 'admin') {
@@ -58,7 +58,7 @@ export default class TarefasController {
     }
   }
 
-  public async getCampanhaDetalhada ({ request, params, response }: HttpContextContract) {
+  public async getCampanhaDetalhada({ request, params, response }: HttpContextContract) {
     if (!params.tipoCampanha) {
       return response.badRequest({ mensagem: 'Parâmetro [tipoCampanha] não informado', code: 'err_0012' })
     }
@@ -108,7 +108,7 @@ export default class TarefasController {
     }
   }
 
-  public async enviarTarefa ({ request, response }: HttpContextContract) {
+  public async enviarTarefa({ request, response }: HttpContextContract) {
     try {
       const dadosTarefa = await request.validate({
         schema: schema.create({
@@ -142,9 +142,47 @@ export default class TarefasController {
       }
     } catch (error) {
       if (error && error.messages && error.messages.errors) {
-        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0019' })
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0024' })
       }
+
       return response.badRequest({ mensagem: 'Houve um erro ao cadastar nova atividade', code: 'err_0020' })
+    }
+  }
+
+  public async editarTarefa({ request, response }: HttpContextContract) {
+    try {
+      const usuario = request.input('usuario')
+      const dadosTarefa = await request.validate({
+        schema: schema.create({
+          idTarefa: schema.number([rules.exists({
+            column: 'id',
+            table: 'tarefas',
+            where: { id_demolay: usuario.id }
+          })]),
+          status: schema.enum(statusAtividade),
+        }),
+        messages: {
+          required: '{{ field }} é obrigatório',
+          enum: '{{ field }} é está com o tipo errado',
+          exists: 'Atividade não encontrada'
+        },
+      })
+
+      if (usuario.role === 'comum' && statusAtividade.indexOf(dadosTarefa.status) > 2) {
+        return response.badRequest({ mensagem: 'Você não pode realizar essa ação', code: 'err_0026' })
+      }
+
+      await Tarefa.query().update({
+        status: statusAtividade.indexOf(dadosTarefa.status)
+      }).where({ id: dadosTarefa.idTarefa })
+
+      return response.ok({ mensagem: 'Atividade atualizada com sucesso' })
+    } catch (error) {
+      if (error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0027' })
+      }
+
+      return response.badRequest({ mensagem: 'Houve um erro ao atualizar atividade', code: 'err_0028' })
     }
   }
 }

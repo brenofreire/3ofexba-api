@@ -32,16 +32,16 @@ Route.group(() => {
     Route.get(':tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
     Route.get('', 'Controllers/TarefasController.getResumoCampanhas')
   }).middleware(['authUser'])
-    .prefix('campanhas')
+  .prefix('campanhas')
 
   Route.group(() => {
     Route.post('', 'Controllers/TarefasController.enviarTarefa')
+    Route.post('editar', 'Controllers/TarefasController.editarTarefa')
   }).middleware(['authUser'])
     .prefix('tarefas')
 
   Route.group(() => {
-    // Route.get('ofex', 'Controllers/CapitulosController.getCapitulosOfex')
-    Route.get('', 'Controllers/CapitulosController.buscarCapitulo')
+    Route.get('', 'Controllers/CapitulosController.buscarCapitulo').middleware('authRegional')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
   }).middleware(['authUser'])
     .prefix('capitulos')

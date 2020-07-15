@@ -43,4 +43,5 @@ Server.middleware.register([
 Server.middleware.registerNamed({
   authUser: 'App/Middleware/AuthUser',
   authAdmin: 'App/Middleware/AuthAdmin',
+  authRegional: 'App/Middleware/AuthRegional',
 })

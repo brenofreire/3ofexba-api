@@ -73,7 +73,7 @@ export default class UsuariosController {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0003' })
       }
       if (rule === 'exists') {
-        return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0003' })
+        return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
       }
       return response.badRequest({ error: 'Erro ao fazer login', code: 'err_0005' })
     }
