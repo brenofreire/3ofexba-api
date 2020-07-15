@@ -168,7 +168,7 @@ export default class TarefasController {
         },
       })
 
-      if (usuario.role === 'comum' && statusAtividade.indexOf(dadosTarefa.status) > 2) {
+      if (['comum', 'regional'].includes(usuario.role) && statusAtividade.indexOf(dadosTarefa.status) > 2) {
         return response.badRequest({ mensagem: 'Você não pode realizar essa ação', code: 'err_0026' })
       }
 
