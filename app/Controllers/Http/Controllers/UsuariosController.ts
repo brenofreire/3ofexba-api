@@ -19,22 +19,27 @@ export default class UsuariosController {
           password: schema.string({}, [rules.minLength(6)]),
           capitulo: schema.number(),
         }),
+        messages: {
+          'email.unique': 'Email já registrado no sistema',
+          'email.email': 'Email inválido',
+          'id_demolay.unique': 'ID Demolay já regsitrado no sistema',
+          'password.minLength': 'Senha deve ter no mínimo 6 caracteres',
+          'capitulo.required': 'O número do capítulo é obrigatório',
+        },
       })
 
-      const usuario = await Usuario.create({
+      await Usuario.create({
         ...dadosCadastro,
         role: roles[0],
         status: 0,
       })
 
-      const token = gerarTokenJWT(usuario)
-
-      return response.ok({ mensagem: 'Usuário criado com sucesso', usuario, token })
+      return response.ok({ mensagem: 'Usuário criado com sucesso' })
     } catch (error) {
-      const [rule, field] = getRuleError(error)
+      const [rule] = getRuleError(error)
 
-      if (rule === 'unique') {
-        return response.badRequest({ mensagem: `${field} já registrado`, codigo: 'err_0001' })
+      if (rule) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, codigo: 'err_0001' })
       }
       return response.badRequest({ error, codigo: 'err_0002' })
     }
@@ -64,18 +69,22 @@ export default class UsuariosController {
         throw { mensagem: 'Credenciais incorretas' }
       }
     } catch (error) {
-      const [rule, field] = getRuleError(error)
-
       if (error.mensagem) {
-        return response.badRequest({ error: error.mensagem, code: 'err_0004' })
+        return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
       }
-      if (rule === 'minLength') {
-        return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0003' })
+      try {
+        const [rule, field] = getRuleError(error)
+        if (rule === 'minLength' || rule === 'required') {
+          return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0003' })
+        }
+        if (rule === 'exists') {
+          return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
+        }        
+      } catch (error) {
+        
+        return response.badRequest({ mensagem: 'Erro ao fazer login', code: 'err_0005' })
       }
-      if (rule === 'exists') {
-        return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
-      }
-      return response.badRequest({ error: 'Erro ao fazer login', code: 'err_0005' })
+
     }
   }
 
