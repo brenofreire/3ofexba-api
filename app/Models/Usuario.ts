@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave, beforeUpdate } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, beforeSave, beforeUpdate, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { Cargos } from 'App/Utils/Utils'
+import Capitulo from './Capitulo'
 
 export default class Usuario extends BaseModel {
   @column({ isPrimary: true })
@@ -33,6 +34,12 @@ export default class Usuario extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+  
+  @belongsTo(() => Capitulo, {
+    localKey: 'numero',
+    foreignKey: 'capitulo',
+  })
+  public capituloInfo: BelongsTo<typeof Capitulo>
 
   @beforeUpdate()
   @beforeSave()

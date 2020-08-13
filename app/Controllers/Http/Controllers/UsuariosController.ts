@@ -60,7 +60,12 @@ export default class UsuariosController {
         }),
       })
 
-      const usuario = await Usuario.query().where({ email: dadosCadastro.email }).firstOrFail()
+      const usuario = await Usuario.query()
+        .where({ email: dadosCadastro.email })
+        .preload('capituloInfo', q => {
+          q.select('nome')
+        })
+        .firstOrFail()
       const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
 
       if (senhaCorreta) {
@@ -69,7 +74,7 @@ export default class UsuariosController {
         throw { mensagem: 'Credenciais incorretas' }
       }
     } catch (error) {
-      if (error.mensagem) {
+      if (error && error.mensagem) {
         return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
       }
       try {
@@ -81,7 +86,7 @@ export default class UsuariosController {
           return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
         }        
       } catch (error) {
-        
+        console.log(error)
         return response.badRequest({ mensagem: 'Erro ao fazer login', code: 'err_0005' })
       }
 
