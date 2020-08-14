@@ -36,13 +36,14 @@ export default class TarefasController {
         throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
       }
 
-      const novoRetorno = {}
+      const novoRetorno:any = []
       campanhas.forEach(campanha => {
         const tarefaInfo = tarefsDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
-        novoRetorno[TiposCampanhaEnumReverso[campanha.tipo]] = {
+        novoRetorno.push({
+          nome: TiposCampanhaEnumReverso[campanha.tipo],
           concluidas: tarefaInfo && tarefaInfo.concluidas || 0,
-          campanhasAtivas: campanha.quantidade,
-        }
+          ativas: campanha.quantidade,
+        })
       })
 
       return response.ok(novoRetorno)
