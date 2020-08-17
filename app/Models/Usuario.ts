@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, beforeSave, beforeUpdate, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { Cargos } from 'App/Utils/Utils'
+import { UserCargos, UserRoles } from 'App/Utils/Utils'
 import Capitulo from './Capitulo'
 
 export default class Usuario extends BaseModel {
@@ -21,10 +21,10 @@ export default class Usuario extends BaseModel {
   public capitulo: number
 
   @column()
-  public cargo: Cargos
+  public cargo: UserCargos
 
   @column()
-  public role: string
+  public role: UserRoles
 
   @column()
   public status: number
