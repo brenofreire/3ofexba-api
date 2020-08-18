@@ -7,10 +7,10 @@ export default class Capitulos extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.string('nome')
-      table.integer('numero').unique()
-      table.string('sigla')
-      table.integer('ofex')
+      table.string('nome').notNullable()
+      table.integer('numero').unique().notNullable()
+      table.string('sigla').notNullable()
+      table.integer('ofex').notNullable()
 
       table.dateTime('created_at')
       table.dateTime('updated_at')

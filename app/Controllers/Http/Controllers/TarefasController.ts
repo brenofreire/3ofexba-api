@@ -44,6 +44,7 @@ export default class TarefasController {
           nome: TiposCampanhaEnumReverso[campanha.tipo],
           concluidas: tarefaInfo && tarefaInfo.concluidas || 0,
           ativas: campanha.quantidade,
+          cargoTarefa: JSON.parse(campanha.cargo_tarefa),
         })
       })
 

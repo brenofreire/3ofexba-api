@@ -7,9 +7,9 @@ export default class UsuariosMetas extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.integer('id_usuario')
-      table.string('meta_key')
-      table.text('meta_value')
+      table.integer('id_usuario').notNullable()
+      table.string('meta_key').notNullable()
+      table.text('meta_value').notNullable()
     })
   }
 

@@ -7,12 +7,12 @@ export default class Usuarios extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.integer('id_demolay').unique()
-      table.string('email').unique()
-      table.string('password')
-      table.integer('capitulo')
-      table.string('role')
-      table.string('status')
+      table.integer('id_demolay').unique().notNullable()
+      table.string('email').unique().notNullable()
+      table.string('password').notNullable()
+      table.integer('capitulo').notNullable()
+      table.string('role').notNullable()
+      table.string('status').notNullable()
       table.string('cargo')
 
       table.dateTime('created_at')
