@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
-import { TiposCampanha } from '../Utils/Utils'
+import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
+import { TiposCampanha, UserCargos } from '../Utils/Utils'
 
 export default class Campanha extends BaseModel {
   @column({ isPrimary: true })
@@ -16,11 +16,19 @@ export default class Campanha extends BaseModel {
   public tipo: TiposCampanha
 
   @column()
-  public status: number
+  public cargo_tarefa: UserCargos[]
+
+  @column()
+  public status: boolean
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @beforeSave()
+  public static async cargoTarefaToArray (tarefa: Campanha) {
+    tarefa.cargo_tarefa = <any> JSON.stringify(tarefa.cargo_tarefa)
+  }
 }

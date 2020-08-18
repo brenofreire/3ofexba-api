@@ -7,6 +7,7 @@ import {
   statusAtividadeLabel,
   getRuleError,
   TiposCampanhaEnum,
+  cargosEnum,
 } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
@@ -186,4 +187,46 @@ export default class TarefasController {
       return response.badRequest({ mensagem: 'Houve um erro ao atualizar atividade', code: 'err_0028' })
     }
   }
+
+  public async cadastrarCampanha({ request, response }: HttpContextContract) {
+    try {
+      const dadosTarefa = await request.validate({
+        schema: schema.create({
+          nome: schema.string(),
+          slug: schema.string({}, [ 
+            rules.unique({ 
+              table: 'campanhas', 
+              column: 'slug', 
+              where: { 
+                tipo: request.input('tipo'),
+                status: request.input('status')
+              }
+            }),
+          ]),
+          tipo: schema.enum(TiposCampanhaEnum),
+          cargo_tarefa: schema.array().members(schema.enum(cargosEnum)),
+          status: schema.boolean(),
+        }),
+        messages: {
+          required: '{{ field }} é obrigatório',
+          enum: '{{ field }} tipo inválido',
+          'slug.unique': 'Atividade já cadastrada'
+        },
+      })
+
+      await Campanha.updateOrCreate({
+        slug: request.input('slug'),
+        status: !request.input('status'),
+      }, dadosTarefa)
+
+      return response.ok({ mensagem: 'Ação realizada com sucesso' })
+    } catch (error) {
+      if (error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0029' })
+      }
+
+      return response.badRequest({ mensagem: 'Houve um erro ao cadastar nova campanha', code: 'err_0030' })
+    }
+  }
+
 }

@@ -31,8 +31,9 @@ Route.group(() => {
   Route.group(() => {
     Route.get(':tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
     Route.get('', 'Controllers/TarefasController.getResumoCampanhas')
+    Route.post('', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
   }).middleware(['authUser'])
-  .prefix('campanhas')
+    .prefix('campanhas')
 
   Route.group(() => {
     Route.post('', 'Controllers/TarefasController.enviarTarefa')

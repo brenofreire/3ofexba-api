@@ -10,6 +10,7 @@ export default class Campanhas extends BaseSchema {
       table.string('nome')
       table.string('slug').index('slug_index_campanha').unique()
       table.string('tipo').index('tipo_index_camapnha')
+      table.string('cargo_tarefa')
       table.integer('status')
 
       table.dateTime('created_at')
