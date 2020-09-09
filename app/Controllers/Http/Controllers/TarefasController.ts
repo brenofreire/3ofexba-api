@@ -25,7 +25,7 @@ export default class TarefasController {
       }
 
       const campanhas = await Campanha.query().select('*').count('id', 'quantidade').groupBy('tipo')
-      const tarefsDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')
+      const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')
         .count('id', 'concluidas')
         .groupBy(['tipo_campanha'])
         .where({
@@ -38,10 +38,11 @@ export default class TarefasController {
       }
 
       const novoRetorno:any = []
-      campanhas.forEach(campanha => {
-        const tarefaInfo = tarefsDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
+      campanhas.map(campanha => {
+        const tarefaInfo = tarefasDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
         novoRetorno.push({
           nome: TiposCampanhaEnumReverso[campanha.tipo],
+          slug: campanha.tipo,
           concluidas: tarefaInfo && tarefaInfo.concluidas || 0,
           ativas: campanha.quantidade,
           cargoTarefa: JSON.parse(campanha.cargo_tarefa),
@@ -68,7 +69,7 @@ export default class TarefasController {
 
     try {
       const campanhas = withExtras(await Campanha.query().select('*').where({ tipo: params.tipoCampanha }))
-      const tarefsDoCapitulo = withExtras(await Tarefa.query().select('*').where({
+      const tarefasDoCapitulo = withExtras(await Tarefa.query().select('*').where({
         capitulo: request.input('usuario').capitulo,
         tipoCampanha: params.tipoCampanha,
       }))
@@ -83,8 +84,9 @@ export default class TarefasController {
           campanha.statusCapituloSlug = statusAtividade[0]
           campanha.statusCapituloLabel = statusAtividadeLabel[0]
         }
-        if (tarefsDoCapitulo && tarefsDoCapitulo.length) {
-          tarefsDoCapitulo.find(tarefa => {
+
+        if (tarefasDoCapitulo && tarefasDoCapitulo.length) {
+          tarefasDoCapitulo.find(tarefa => {
             if (tarefa.slug_campanha === campanha.slug) {
               campanha.statusCapitulo = tarefa.status
               campanha.statusCapituloSlug = statusAtividade[tarefa.status]
@@ -95,13 +97,17 @@ export default class TarefasController {
               setTarefaNaoRealizada()
             }
           })
+        } else {          
+          setTarefaNaoRealizada()
         }
-        setTarefaNaoRealizada()
 
         return campanha
       })
 
-      return response.ok(campanhas)
+      return response.ok({ 
+        tituloTarefa: TiposCampanhaEnumReverso[params.tipoCampanha],
+        tarefas: campanhas
+      })
     } catch (error) {
       if (error && error.mensagem) {
         return response.notFound(error)

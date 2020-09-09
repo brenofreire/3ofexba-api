@@ -42,6 +42,14 @@ Route.group(() => {
     .prefix('tarefas')
 
   Route.group(() => {
+    Route.group(() => {
+      Route.post('', 'Controllers/AgostinhoController.enviarMensagem')
+    }).middleware(['authAdmin'])
+
+  }).middleware(['authUser'])
+    .prefix('agostinho')
+
+  Route.group(() => {
     Route.get('', 'Controllers/CapitulosController.buscarCapitulo').middleware('authRegional')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
   }).middleware(['authUser'])
