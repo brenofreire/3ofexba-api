@@ -26,10 +26,8 @@ export default class AuthUser {
     } else if(user.error === 'jwt_expired_token_refreshed') {
       return response.badRequest(user)
     }
-
-    const role = user.role || ''
-    user.ID = user.id
-    request.updateBody({ ...{ usuario: user, ...{ role } }, ...request.all() })
+    
+    request.updateBody({ ...{ usuario: user }, ...request.all() })
     return await next()
   }
 

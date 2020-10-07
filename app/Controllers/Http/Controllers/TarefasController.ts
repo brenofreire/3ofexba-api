@@ -83,6 +83,7 @@ export default class TarefasController {
           campanha.statusCapitulo = 0
           campanha.statusCapituloSlug = statusAtividade[0]
           campanha.statusCapituloLabel = statusAtividadeLabel[0]
+          delete campanha.id
         }
 
         if (tarefasDoCapitulo && tarefasDoCapitulo.length) {
@@ -91,6 +92,7 @@ export default class TarefasController {
               campanha.statusCapitulo = tarefa.status
               campanha.statusCapituloSlug = statusAtividade[tarefa.status]
               campanha.statusCapituloLabel = statusAtividadeLabel[tarefa.status]
+              campanha.id = tarefa.id
 
               return tarefa
             } else {
@@ -173,7 +175,7 @@ export default class TarefasController {
         messages: {
           required: '{{ field }} é obrigatório',
           enum: '{{ field }} é está com o tipo errado',
-          exists: 'Atividade não encontrada'
+          exists: 'Atividade não encontrada ou não pertence a você'
         },
       })
 

@@ -86,7 +86,6 @@ export default class UsuariosController {
           return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
         }        
       } catch (error) {
-        console.log(error)
         return response.badRequest({ mensagem: 'Erro ao fazer login', code: 'err_0005' })
       }
 
