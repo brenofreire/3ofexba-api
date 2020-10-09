@@ -40,4 +40,31 @@ export default class AgostinhoController {
       }
     }
   }
+
+  public async getMensagens({ request, response }: HttpContextContract) {
+    const opcoesListaMensagens = await request.validate({
+      schema: schema.create({
+        offset: schema.string(),
+      }),
+      messages: {
+        required: '{{ field }} é obrigatório',
+        enum: '{{ field }} tipo inválido',
+      },
+    })
+
+    try {
+      const usuario = request.input('usuario')
+      const mensagens = await Agostinho.query().select()
+        .offset(Number(opcoesListaMensagens.offset))
+        .whereRaw(`destinatarios LIKE '%${usuario.cargo}%'`)
+        .limit(10)
+
+      return response.ok(mensagens)
+    } catch (error) {
+      return response.internalServerError({
+        mensagem: 'Houve um erro inesperado ao listar mensagens',
+        code: 'err_0033'
+      })
+    }
+  }
 }

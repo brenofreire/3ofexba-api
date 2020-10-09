@@ -46,6 +46,7 @@ Route.group(() => {
       Route.post('', 'Controllers/AgostinhoController.enviarMensagem')
     }).middleware(['authAdmin'])
 
+    Route.get('', 'Controllers/AgostinhoController.getMensagens')
   }).middleware(['authUser'])
     .prefix('agostinho')
 
