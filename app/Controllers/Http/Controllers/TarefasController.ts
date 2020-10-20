@@ -16,14 +16,16 @@ export default class TarefasController {
   public async getResumoCampanhas({ request, response }: HttpContextContract) {
     try {
       let validacaoResumo: any = {}
+      let lowerLikeNomeCampanha = ''
       if (request.input('usuario').role === 'admin') {
+        const termoBusca = request.input('termoBusca')
         validacaoResumo = await request.validate({
           schema: schema.create({
             capitulo: schema.string(),
           }),
         })
+        lowerLikeNomeCampanha = termoBusca && `LOWER(nome) LIKE '%${termoBusca}%'` || ''
       }
-
       const campanhas = await Campanha.query().select('*').count('id', 'quantidade').groupBy('tipo')
       const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')
         .count('id', 'concluidas')
@@ -32,12 +34,13 @@ export default class TarefasController {
           capitulo: validacaoResumo.capitulo || request.input('usuario').capitulo,
           status: statusAtividade.indexOf('atividade-aprovada'),
         })
+        .whereRaw(lowerLikeNomeCampanha)        
 
       if (!campanhas.length) {
         throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
       }
 
-      const novoRetorno:any = []
+      const novoRetorno: any = []
       campanhas.map(campanha => {
         const tarefaInfo = tarefasDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
         novoRetorno.push({
@@ -55,7 +58,7 @@ export default class TarefasController {
       if (rule === 'required') {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0017' })
       } else if (error && error.mensagem) {
-        return response.notFound(error)
+        return response.badRequest(error)
       } else {
         return response.badRequest({ mensagem: 'Houve um erro ao listar atividades do capítulo', code: 'err_0011' })
       }
@@ -99,14 +102,14 @@ export default class TarefasController {
               setTarefaNaoRealizada()
             }
           })
-        } else {          
+        } else {
           setTarefaNaoRealizada()
         }
 
         return campanha
       })
 
-      return response.ok({ 
+      return response.ok({
         tituloTarefa: TiposCampanhaEnumReverso[params.tipoCampanha],
         tarefas: campanhas
       })
@@ -202,11 +205,11 @@ export default class TarefasController {
       const dadosTarefa = await request.validate({
         schema: schema.create({
           nome: schema.string(),
-          slug: schema.string({}, [ 
-            rules.unique({ 
-              table: 'campanhas', 
-              column: 'slug', 
-              where: { 
+          slug: schema.string({}, [
+            rules.unique({
+              table: 'campanhas',
+              column: 'slug',
+              where: {
                 tipo: request.input('tipo'),
                 status: request.input('status')
               }

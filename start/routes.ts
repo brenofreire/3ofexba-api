@@ -55,4 +55,9 @@ Route.group(() => {
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
   }).middleware(['authUser'])
     .prefix('capitulos')
+
+  Route.group(() => {
+    Route.get('regioes', 'Controllers/CapitulosController.getRegioes').middleware('authRegional')
+  }).middleware(['authUser', 'authRegional'])
+    .prefix('admin')
 })

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export const statusUsuario = ['excluido', 'ativo', 'suspenso']
 
 type StatusAvidadesInterface = 'atividade-nao-formulada' | 'atividade-realizada' | 'atividade-enviada' |
-'atividade-devolvida' | 'atividade-recusada' | 'atividade-aprovada'
+  'atividade-devolvida' | 'atividade-recusada' | 'atividade-aprovada'
 export const statusAtividade: StatusAvidadesInterface[] = [
   'atividade-nao-formulada', 'atividade-realizada', 'atividade-enviada',
   'atividade-devolvida', 'atividade-recusada', 'atividade-aprovada',
@@ -56,4 +56,25 @@ export const withExtras = (objeto) => {
     })
   }
   return { ...JSON.parse(JSON.stringify(objeto)), ...objeto?.extras }
+}
+
+export const parsearArrayStringfadoNoArrayOuObjeto = (valor) => {
+  valor = withExtras(valor)
+
+  if(!Array.isArray(valor)) {
+    valor = [valor]
+  }
+
+  for (const chave in valor) {
+    for (const key in valor[chave]) {
+      try {      
+        valor[chave][key] = JSON.parse(valor[chave][key])
+      } catch (error) {
+        valor[chave][key] = valor[chave][key]      
+      }
+    }
+  }
+
+
+  return valor
 }

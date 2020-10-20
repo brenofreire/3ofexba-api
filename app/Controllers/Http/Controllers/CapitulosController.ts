@@ -53,6 +53,8 @@ export default class CapitulosController {
           }
         })
         .andWhere({ ofex: dadosBusca.ofex })
+        .limit(10)
+        .offset(request.input('offset'))
 
       return response.ok(capitulos)
     } catch (error) {
@@ -60,6 +62,20 @@ export default class CapitulosController {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0022' })
       }
       return response.badRequest({ mensagem: 'Erro ao buscar capítulos', code: 'err_0021' })
+    }
+  }
+
+  async getRegioes({ response }: HttpContextContract) {
+    try {
+      const regioes = await (await Capitulo.query().select('ofex').groupBy('ofex'))
+        .map(regiao => regiao.ofex)
+
+      return response.ok(regioes)
+    } catch (error) {
+      return response.internalServerError({ 
+        mensagem: 'Erro ao listar regiões',
+        code: 'err_0035', 
+      })
     }
   }
 }
