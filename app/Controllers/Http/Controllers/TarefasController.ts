@@ -53,7 +53,7 @@ export default class TarefasController {
           slug: campanha.tipo,
           concluidas: tarefaInfo && tarefaInfo.concluidas || 0,
           ativas: campanha.quantidade,
-          cargoTarefa: JSON.parse(campanha.cargo_tarefa),
+          cargoTarefa: campanha.cargo_tarefa,
         })
       })
 
@@ -216,18 +216,18 @@ export default class TarefasController {
       const dadosTarefa = await request.validate({
         schema: schema.create({
           nome: schema.string(),
-          slug: schema.string({}, [
+          slug: !request.input('id') ? schema.string({}, [
             rules.unique({
               table: 'campanhas',
               column: 'slug',
               where: {
                 tipo: request.input('tipo'),
-                status: request.input('status')
+                status: request.input('status'),
               }
-            }),
-          ]),
+            })
+          ]) : schema.string(),
           tipo: schema.enum(TiposCampanhaEnum),
-          cargo_tarefa: schema.array().members(schema.enum(cargosEnum)),
+          cargo_tarefa: schema.enum(cargosEnum),
           status: schema.boolean(),
         }),
         messages: {
@@ -239,7 +239,6 @@ export default class TarefasController {
 
       await Campanha.updateOrCreate({
         slug: request.input('slug'),
-        status: !request.input('status'),
       }, dadosTarefa)
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
@@ -252,4 +251,9 @@ export default class TarefasController {
     }
   }
 
+  async getTiposCampanha({ response }: HttpContextContract) {
+    const tipos = await this.tiposCampanhaCtrl.getTipoCampanhas()
+
+    return response.ok(tipos.TiposCampanhaEnumReverso)
+  }
 }

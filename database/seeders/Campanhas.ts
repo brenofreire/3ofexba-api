@@ -24,13 +24,13 @@ export default class CampanhasSeeder extends BaseSeeder {
     }, {
       nome: 'Relatório DeMolays ativos e Consultores',
       slug: 'relatorio-dms-ativos-consultores',
-      tipo: 'caneta-ouro',
+      tipo: 'caneta-de-ouro',
       status: true,
       cargo_tarefa: ['esc'],
     }, {
       nome: 'Relatório semestral tesouraria',
       slug: 'relatorio-semestral-tesouraria',
-      tipo: 'tesoureiro-ouro',
+      tipo: 'tesoureiro-de-ouro',
       status: true,
       cargo_tarefa: ['tes'],
     }])

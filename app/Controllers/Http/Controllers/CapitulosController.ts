@@ -92,14 +92,13 @@ export default class CapitulosController {
         .limit(10))
 
       for (const item in campanhasAdmin) {
-        campanhasAdmin[item].cargo_tarefa = JSON.parse(<any>campanhasAdmin[item].cargo_tarefa)
         campanhasAdmin[item]['tipoLabel'] = TiposCampanhaEnumReverso[campanhasAdmin[item].tipo]
       }
 
       return response.ok(campanhasAdmin)
     } catch (error) {
       return response.internalServerError({
-        mensagem: 'Erro ao listar regiões',
+        mensagem: 'Erro ao listar campanhas do admin',
         code: 'err_0036',
       })
     }

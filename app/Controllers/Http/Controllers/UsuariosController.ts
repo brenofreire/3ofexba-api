@@ -68,12 +68,14 @@ export default class UsuariosController {
         .firstOrFail()
       const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
 
+      console.log(request.input('password'))
+
       if (senhaCorreta) {
         return response.ok({ usuario, token: gerarTokenJWT(usuario) })
       } else {
         throw { mensagem: 'Credenciais incorretas' }
       }
-    } catch (error) {
+    } catch (error) {      
       if (error && error.mensagem) {
         return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
       }
