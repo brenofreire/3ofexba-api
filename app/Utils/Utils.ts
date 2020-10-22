@@ -13,20 +13,11 @@ export const statusAtividadeLabel = [
   'Atividade devolvida', 'Atividade recusada', 'Atividade aprovada',
 ]
 
-export type UserCargos = 'mc' | 'esc' | 'tes' | 'hos'
-export const cargosEnum: UserCargos[] = ['mc', 'esc', 'tes', 'hos']
+export type UserCargos = 'mc' | 'esc' | 'tes' | 'hos' // MODEL
+export const cargosEnum: UserCargos[] = ['mc', 'esc', 'tes', 'hos'] // MODEL
 
 export type UserRoles = 'admin' | 'regional' | 'comum'
 export const rolesEnum: UserRoles[] = ['admin', 'regional', 'comum']
-
-export type TiposCampanha = 'cnie' | 'caneta-ouro' | 'tesoureiro-ouro' | 'hospitaleiro-ouro'
-export const TiposCampanhaEnum: TiposCampanha[] = ['cnie', 'caneta-ouro', 'tesoureiro-ouro', 'hospitaleiro-ouro']
-export const TiposCampanhaEnumReverso = {
-  'cnie': 'CNIE',
-  'caneta-ouro': 'Caneta de Ouro',
-  'tesoureiro-ouro': 'Tesoureiro de Ouro',
-  'hospitaleiro-ouro': 'Hospitaleiro de Ouro',
-}
 
 export const getRuleError = (error) => {
   return error.messages && error.messages.errors && [error.messages.errors[0].rule, error.messages.errors[0].field]

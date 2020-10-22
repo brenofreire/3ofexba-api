@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
-import { TiposCampanha, UserCargos } from '../Utils/Utils'
+import { UserCargos } from '../Utils/Utils'
 
 export default class Campanha extends BaseModel {
   @column({ isPrimary: true })
@@ -13,7 +13,7 @@ export default class Campanha extends BaseModel {
   public slug: string
 
   @column()
-  public tipo: TiposCampanha
+  public tipo
 
   @column()
   public cargo_tarefa: UserCargos[]

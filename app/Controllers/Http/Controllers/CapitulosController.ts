@@ -1,9 +1,14 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
+import Campanha from 'App/Models/Campanha'
 import Capitulo from 'App/Models/Capitulo'
+import { withExtras } from 'App/Utils/Utils'
+import TipoCampanhasController from './TipoCampanhasController'
 
 export default class CapitulosController {
-  public async cadastrarEditarCapitulo ({ request, response }: HttpContextContract) {
+  private tiposCampanhaCtrl = new TipoCampanhasController()
+
+  public async cadastrarEditarCapitulo({ request, response }: HttpContextContract) {
     try {
       const dadosCadastro = await request.validate({
         schema: schema.create({
@@ -25,7 +30,7 @@ export default class CapitulosController {
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
-      if(error && error.messages && error.messages.errors) {
+      if (error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0019' })
       }
       return response.badRequest({
@@ -35,7 +40,7 @@ export default class CapitulosController {
     }
   }
 
-  public async buscarCapitulo ({ request, response }: HttpContextContract) {
+  public async buscarCapitulo({ request, response }: HttpContextContract) {
     try {
       const dadosBusca = await request.validate({
         schema: schema.create({
@@ -47,7 +52,7 @@ export default class CapitulosController {
 
       const capitulos = await Capitulo.query()
         .where(q => {
-          if(dadosBusca.termoBusca) {
+          if (dadosBusca.termoBusca) {
             q.whereRaw(`LOWER(nome) LIKE '%${dadosBusca.termoBusca}%'`)
             q.orWhereRaw(`LOWER(sigla) LIKE '%${dadosBusca.termoBusca}%'`)
           }
@@ -58,7 +63,7 @@ export default class CapitulosController {
 
       return response.ok(capitulos)
     } catch (error) {
-      if(error && error.messages && error.messages.errors) {
+      if (error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0022' })
       }
       return response.badRequest({ mensagem: 'Erro ao buscar capítulos', code: 'err_0021' })
@@ -72,9 +77,30 @@ export default class CapitulosController {
 
       return response.ok(regioes)
     } catch (error) {
-      return response.internalServerError({ 
+      return response.internalServerError({
         mensagem: 'Erro ao listar regiões',
-        code: 'err_0035', 
+        code: 'err_0035',
+      })
+    }
+  }
+  async getCampanhasAdmin({ request, response }: HttpContextContract) {
+    try {
+      const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
+      const campanhasAdmin = withExtras(await Campanha.query()
+        .whereRaw(`LOWER(nome) LIKE '%${request.input('termoBusca')}%'`)
+        .offset(request.input('offset'))
+        .limit(10))
+
+      for (const item in campanhasAdmin) {
+        campanhasAdmin[item].cargo_tarefa = JSON.parse(<any>campanhasAdmin[item].cargo_tarefa)
+        campanhasAdmin[item]['tipoLabel'] = TiposCampanhaEnumReverso[campanhasAdmin[item].tipo]
+      }
+
+      return response.ok(campanhasAdmin)
+    } catch (error) {
+      return response.internalServerError({
+        mensagem: 'Erro ao listar regiões',
+        code: 'err_0036',
       })
     }
   }

@@ -1,22 +1,23 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Campanha from 'App/Models/Campanha'
 import {
-  TiposCampanhaEnumReverso,
   statusAtividade,
   withExtras,
   statusAtividadeLabel,
   getRuleError,
-  TiposCampanhaEnum,
   cargosEnum,
 } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import TipoCampanhasController from './TipoCampanhasController'
 
 export default class TarefasController {
+  private tiposCampanhaCtrl = new TipoCampanhasController()
   public async getResumoCampanhas({ request, response }: HttpContextContract) {
     try {
       let validacaoResumo: any = {}
       let lowerLikeNomeCampanha = ''
+
       if (request.input('usuario').role === 'admin') {
         const termoBusca = request.input('termoBusca')
         validacaoResumo = await request.validate({
@@ -26,6 +27,9 @@ export default class TarefasController {
         })
         lowerLikeNomeCampanha = termoBusca && `LOWER(nome) LIKE '%${termoBusca}%'` || ''
       }
+
+      console.log('validacaoResumo', validacaoResumo);
+
       const campanhas = await Campanha.query().select('*').count('id', 'quantidade').groupBy('tipo')
       const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')
         .count('id', 'concluidas')
@@ -34,13 +38,14 @@ export default class TarefasController {
           capitulo: validacaoResumo.capitulo || request.input('usuario').capitulo,
           status: statusAtividade.indexOf('atividade-aprovada'),
         })
-        .whereRaw(lowerLikeNomeCampanha)        
+        .whereRaw(lowerLikeNomeCampanha)
 
       if (!campanhas.length) {
         throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
       }
 
       const novoRetorno: any = []
+      const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
       campanhas.map(campanha => {
         const tarefaInfo = tarefasDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
         novoRetorno.push({
@@ -72,10 +77,12 @@ export default class TarefasController {
 
     try {
       const campanhas = withExtras(await Campanha.query().select('*').where({ tipo: params.tipoCampanha }))
-      const tarefasDoCapitulo = withExtras(await Tarefa.query().select('*').where({
-        capitulo: request.input('usuario').capitulo,
-        tipoCampanha: params.tipoCampanha,
-      }))
+      const tarefasDoCapitulo = withExtras(
+        await Tarefa.query().select('*').where({
+          capitulo: request.input('capitulo') || request.input('usuario').capitulo,
+          tipoCampanha: params.tipoCampanha,
+        })
+      )
 
       if (!campanhas.length) {
         throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0013' })
@@ -109,6 +116,8 @@ export default class TarefasController {
         return campanha
       })
 
+      const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
+
       return response.ok({
         tituloTarefa: TiposCampanhaEnumReverso[params.tipoCampanha],
         tarefas: campanhas
@@ -123,6 +132,7 @@ export default class TarefasController {
   }
 
   public async enviarTarefa({ request, response }: HttpContextContract) {
+    const TiposCampanhaEnum = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnum
     try {
       const dadosTarefa = await request.validate({
         schema: schema.create({
@@ -202,6 +212,7 @@ export default class TarefasController {
 
   public async cadastrarCampanha({ request, response }: HttpContextContract) {
     try {
+      const TiposCampanhaEnum = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnum
       const dadosTarefa = await request.validate({
         schema: schema.create({
           nome: schema.string(),

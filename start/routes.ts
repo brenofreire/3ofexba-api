@@ -31,33 +31,34 @@ Route.group(() => {
   Route.group(() => {
     Route.get(':tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
     Route.get('', 'Controllers/TarefasController.getResumoCampanhas')
-    Route.post('', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
   }).middleware(['authUser'])
-    .prefix('campanhas')
-
+  .prefix('campanhas')
+  
   Route.group(() => {
     Route.post('', 'Controllers/TarefasController.enviarTarefa')
     Route.post('editar', 'Controllers/TarefasController.editarTarefa')
   }).middleware(['authUser'])
-    .prefix('tarefas')
-
+  .prefix('tarefas')
+  
   Route.group(() => {
     Route.group(() => {
       Route.post('', 'Controllers/AgostinhoController.enviarMensagem')
     }).middleware(['authAdmin'])
-
+    
     Route.get('', 'Controllers/AgostinhoController.getMensagens')
   }).middleware(['authUser'])
-    .prefix('agostinho')
-
+  .prefix('agostinho')
+  
   Route.group(() => {
     Route.get('', 'Controllers/CapitulosController.buscarCapitulo').middleware('authRegional')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
   }).middleware(['authUser'])
-    .prefix('capitulos')
-
+  .prefix('capitulos')
+  
   Route.group(() => {
     Route.get('regioes', 'Controllers/CapitulosController.getRegioes').middleware('authRegional')
+    Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin').middleware('authRegional')
+    Route.post('campanhas', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
   }).middleware(['authUser', 'authRegional'])
     .prefix('admin')
 })
