@@ -8,31 +8,31 @@ export default class CampanhasSeeder extends BaseSeeder {
       slug: 'iniciacao',
       tipo: 'cnie',
       status: true,
-      cargo_tarefa: ['mc'],
+      cargo_tarefa: 'mc',
     }, {
       nome: 'Cerimônia Magna de Elevação',
       slug: 'elevacao',
       tipo: 'cnie',
       status: true,
-      cargo_tarefa: ['mc'],
+      cargo_tarefa: 'mc',
     }, {
       nome: 'Arrecação de Fundos',
       slug: 'arrecadacao-fundos',
       tipo: 'cnie',
       status: true,
-      cargo_tarefa: ['mc'],
+      cargo_tarefa: 'mc',
     }, {
       nome: 'Relatório DeMolays ativos e Consultores',
       slug: 'relatorio-dms-ativos-consultores',
       tipo: 'caneta-de-ouro',
       status: true,
-      cargo_tarefa: ['esc'],
+      cargo_tarefa: 'esc',
     }, {
       nome: 'Relatório semestral tesouraria',
       slug: 'relatorio-semestral-tesouraria',
       tipo: 'tesoureiro-de-ouro',
       status: true,
-      cargo_tarefa: ['tes'],
+      cargo_tarefa: 'tes',
     }])
   }
 }

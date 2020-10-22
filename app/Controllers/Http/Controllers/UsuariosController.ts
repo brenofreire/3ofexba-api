@@ -3,6 +3,7 @@ import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
 import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, cargosEnum } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
+import TipoUserCargos from 'App/Models/TipoUserCargo'
 
 export default class UsuariosController {
   public async cadastro ({ request, response }: HttpContextContract) {
@@ -139,6 +140,59 @@ export default class UsuariosController {
         return response.badRequest({ error: error.mensagem, code: 'err_0008' })
       }
       return response.badRequest({ error: 'Erro ao alterar stauts de usuário', code: 'err_0009' })
+    }
+  }
+
+  public async cadastrarCargo({ request, response }: HttpContextContract) {
+    const dadosCargo = await request.validate({
+      schema: schema.create({
+        nome: schema.string(),
+        sigla: !request.input('id') ? schema.string({}, [
+          rules.unique({
+            table: 'tipo_user_cargos',
+            column: 'sigla',
+            where: {
+              sigla: request.input('sigla'),
+            }
+          })
+        ]) : schema.string(),
+      }),
+      messages: {
+        required: '{{ field }} é obrigatório',
+        enum: '{{ field }} tipo inválido',
+        'slug.unique': 'Atividade já cadastrada'
+      },
+    })
+    try {
+      await TipoUserCargos.updateOrCreate({ slug: request.input('slug')}, dadosCargo)
+
+      return response.ok({ mensagem: 'Ação realizada com sucesso' })
+    } catch (error) {
+      if (error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0029' })
+      }
+
+      return response.badRequest({ mensagem: 'Houve um erro ao realização ação', code: 'err_0037' })
+    }
+  }
+
+  async getTiposCargo({ response }: HttpContextContract) {
+    const tipos = await this.getTiposCargoGeneric()
+
+    return response.ok(tipos.tiposUserCargosEnumReverse)
+  }
+
+  async getTiposCargoGeneric() {
+    const tiposCargo = await TipoUserCargos.all()
+    const tiposUserCargosEnumReverse = {}
+
+    tiposCargo.forEach(tipo => {
+      tiposUserCargosEnumReverse[tipo.slug] = tipo.nome
+    })
+
+    return {
+      tiposUserCargosEnum: tiposCargo.map(item => item.slug),
+      tiposUserCargosEnumReverse,
     }
   }
 }
