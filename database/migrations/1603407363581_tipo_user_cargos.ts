@@ -6,7 +6,8 @@ export default class TipoUserCargos extends BaseSchema {
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.timestamps(true)
+      table.string('nome').notNullable
+      table.string('slug').notNullable
     })
   }
 

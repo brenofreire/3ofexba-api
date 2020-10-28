@@ -10,6 +10,8 @@ import {
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import TipoCampanhasController from './TipoCampanhasController'
+import moment from 'moment'
+import slugify from 'slugify'
 
 export default class TarefasController {
   private tiposCampanhaCtrl = new TipoCampanhasController()
@@ -30,7 +32,10 @@ export default class TarefasController {
 
       console.log('validacaoResumo', validacaoResumo);
 
-      const campanhas = await Campanha.query().select('*').count('id', 'quantidade').groupBy('tipo')
+      const campanhas = await Campanha.query().select('*')
+        .count('id', 'quantidade')
+        .groupBy('tipo')
+        .andWhere('data_final_semestre', '>', moment().format('YYYY-MM-DD HH:mm:ss'))
       const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tipo_campanha')
         .count('id', 'concluidas')
         .groupBy(['tipo_campanha'])
@@ -38,7 +43,7 @@ export default class TarefasController {
           capitulo: validacaoResumo.capitulo || request.input('usuario').capitulo,
           status: statusAtividade.indexOf('atividade-aprovada'),
         })
-        .whereRaw(lowerLikeNomeCampanha)
+        .whereRaw(lowerLikeNomeCampanha)        
 
       if (!campanhas.length) {
         throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
@@ -76,9 +81,14 @@ export default class TarefasController {
     }
 
     try {
-      const campanhas = withExtras(await Campanha.query().select('*').where({ tipo: params.tipoCampanha }))
+      const campanhas = withExtras(
+        await Campanha.query().select('*')
+          .where({ tipo: params.tipoCampanha })
+          .andWhere('data_final_semestre', '>', moment().format('YYYY-MM-DD HH:mm:ss'))
+      )
       const tarefasDoCapitulo = withExtras(
-        await Tarefa.query().select('*').where({
+        await Tarefa.query().select('*')
+        .where({
           capitulo: request.input('capitulo') || request.input('usuario').capitulo,
           tipoCampanha: params.tipoCampanha,
         })
@@ -211,23 +221,30 @@ export default class TarefasController {
   }
 
   public async cadastrarCampanha({ request, response }: HttpContextContract) {
+    const slugQueJaTem = request.input('slug')
+    const statusQueJaTem = request.input('status')
+
+    request.updateBody({
+      ...request.all(),
+      slug: !slugQueJaTem ? slugify(request.input('nome'), { lower: true }) : slugQueJaTem,
+      status: typeof slugQueJaTem !== 'undefined' ? statusQueJaTem : true,
+    })
+
     try {
-      const TiposCampanhaEnum = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnum
+      const TiposCampanhaEnum = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnum      
       const dadosTarefa = await request.validate({
         schema: schema.create({
           nome: schema.string(),
           slug: !request.input('id') ? schema.string({}, [
             rules.unique({
               table: 'campanhas',
-              column: 'slug',
-              where: {
-                tipo: request.input('tipo'),
-                status: request.input('status'),
-              }
+              column: 'slug',              
             })
           ]) : schema.string(),
           tipo: schema.enum(TiposCampanhaEnum),
           cargo_tarefa: schema.enum(cargosEnum),
+          data_entrega: schema.date({ format: 'yyyy-LL-dd HH:mm:ss' }),
+          data_final_semestre: schema.date({ format: 'yyyy-LL-dd HH:mm:ss' }),
           status: schema.boolean(),
         }),
         messages: {
@@ -239,10 +256,12 @@ export default class TarefasController {
 
       await Campanha.updateOrCreate({
         slug: request.input('slug'),
-      }, dadosTarefa)
+      }, JSON.parse(JSON.stringify(dadosTarefa)))
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
+      console.log(error)
+      
       if (error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0029' })
       }

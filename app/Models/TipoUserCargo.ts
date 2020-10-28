@@ -8,5 +8,5 @@ export default class TipoUserCargos extends BaseModel {
   public nome: string
 
   @column()
-  public sigla: string
+  public slug: string
 }
