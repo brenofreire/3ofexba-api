@@ -148,6 +148,7 @@ export default class TarefasController {
         schema: schema.create({
           slugCampanha: schema.string(),
           tipoCampanha: schema.enum(TiposCampanhaEnum),
+          status: schema.string.optional(),
         }),
         messages: {
           required: '{{ field }} é obrigatório',
@@ -169,7 +170,7 @@ export default class TarefasController {
           tipoCampanha: dadosTarefa.tipoCampanha,
           capitulo: request.input('usuario').capitulo,
           idDemolay: request.input('usuario').id,
-          status: statusAtividade.indexOf('atividade-nao-formulada'),
+          status: statusAtividade.indexOf(request.input('status') || 'atividade-nao-formulada'),
         })
 
         return response.ok({ mensagem: 'Atividade enviada com sucesso' })
