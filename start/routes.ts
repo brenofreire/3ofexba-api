@@ -59,8 +59,10 @@ Route.group(() => {
     .prefix('capitulos')
 
   Route.group(() => {
-    Route.get('regioes', 'Controllers/CapitulosController.getRegioes').middleware('authRegional')
-    Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin').middleware('authRegional')
+    Route.get('regioes', 'Controllers/CapitulosController.getRegioes')
+    Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin')
+
+    Route.get('usuarios', 'Controllers/UsuariosController.getUsuariosAdmin').middleware('authAdmin')
     Route.post('campanhas', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
   }).middleware(['authUser', 'authRegional'])
     .prefix('admin')

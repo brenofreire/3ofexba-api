@@ -6,10 +6,11 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import TipoUserCargos from 'App/Models/TipoUserCargo'
 
 export default class UsuariosController {
-  public async cadastro ({ request, response }: HttpContextContract) {
+  public async cadastro({ request, response }: HttpContextContract) {
     try {
       const dadosCadastro = await request.validate({
         schema: schema.create({
+          nome: schema.string({}, [rules.minLength(3)]),
           email: schema.string({}, [
             rules.email(),
             rules.unique({ table: 'usuarios', column: 'email' }),
@@ -26,6 +27,7 @@ export default class UsuariosController {
           'id_demolay.unique': 'ID Demolay já regsitrado no sistema',
           'password.minLength': 'Senha deve ter no mínimo 6 caracteres',
           'capitulo.required': 'O número do capítulo é obrigatório',
+          'nome.minLength': 'O nome deve ter ao menos 3 letras',
         },
       })
 
@@ -46,7 +48,7 @@ export default class UsuariosController {
     }
   }
 
-  public async login ({ request, response }: HttpContextContract) {
+  public async login({ request, response }: HttpContextContract) {
     try {
       const dadosCadastro = await request.validate({
         schema: schema.create({
@@ -76,7 +78,7 @@ export default class UsuariosController {
       } else {
         throw { mensagem: 'Credenciais incorretas' }
       }
-    } catch (error) {      
+    } catch (error) {
       if (error && error.mensagem) {
         return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
       }
@@ -87,7 +89,7 @@ export default class UsuariosController {
         }
         if (rule === 'exists') {
           return response.badRequest({ mensagem: `${field} não cadastrado`, code: 'err_0025' })
-        }        
+        }
       } catch (error) {
         return response.badRequest({ mensagem: 'Erro ao fazer login', code: 'err_0005' })
       }
@@ -95,10 +97,11 @@ export default class UsuariosController {
     }
   }
 
-  public async mudarStatusUsuario ({ request, response }: HttpContextContract) {
+  public async mudarStatusUsuario({ request, response }: HttpContextContract) {
     try {
       const dadosAceitarCadastro = await request.validate({
         schema: schema.create({
+          nome: schema.string(),
           email: schema.string({}, [
             rules.exists({
               table: 'usuarios', column: 'email',
@@ -164,7 +167,7 @@ export default class UsuariosController {
       },
     })
     try {
-      await TipoUserCargos.updateOrCreate({ slug: request.input('slug')}, dadosCargo)
+      await TipoUserCargos.updateOrCreate({ slug: request.input('slug') }, dadosCargo)
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
@@ -194,5 +197,26 @@ export default class UsuariosController {
       tiposUserCargosEnum: tiposCargo.map(item => item.slug),
       tiposUserCargosEnumReverse,
     }
+  }
+
+  async getUsuariosAdmin({ request, response }: HttpContextContract) {
+    const usuarios = await Usuario.query().select()
+      .where(q => {
+        if (request.input('nao-aprovados')) {
+          q.where({ status: 0 })
+        }
+      })
+      .where(q => {
+        if(request.input('termoBusca')) {
+          q.whereRaw(`LOWER(nome) LIKE '%${request.input('termoBusca')}%'`)
+          q.orWhereRaw(`LOWER(email) LIKE '%${request.input('termoBusca')}%'`)
+          q.orWhereRaw(`LOWER(capitulo) LIKE '%${request.input('termoBusca')}%'`)
+          q.orWhereRaw(`LOWER(id_demolay) LIKE '%${request.input('termoBusca')}%'`)
+        }
+      })
+      .offset(request.input('offset'))
+      .limit(10)
+
+    return response.ok(usuarios)
   }
 }
