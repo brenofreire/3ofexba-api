@@ -25,10 +25,6 @@ Route.group(() => {
   Route.post('login', 'Controllers/UsuariosController.login')
 
   Route.group(() => {
-    Route.post('mudar-status-usuario', 'Controllers/UsuariosController.mudarStatusUsuario')
-  }).middleware(['authUser', 'authAdmin'])
-
-  Route.group(() => {
     Route.get('tipos', 'Controllers/TarefasController.getTiposCampanha')
     Route.group(() => {
       Route.get(':tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
@@ -60,9 +56,11 @@ Route.group(() => {
 
   Route.group(() => {
     Route.get('regioes', 'Controllers/CapitulosController.getRegioes')
-    Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin')
-
+    
     Route.get('usuarios', 'Controllers/UsuariosController.getUsuariosAdmin').middleware('authAdmin')
+    Route.post('usuarios', 'Controllers/UsuariosController.mudarStatusUsuario')
+    
+    Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin')
     Route.post('campanhas', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
   }).middleware(['authUser', 'authRegional'])
     .prefix('admin')

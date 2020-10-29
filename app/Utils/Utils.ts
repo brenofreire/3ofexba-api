@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-export const statusUsuario = ['excluido', 'ativo', 'suspenso']
+export const statusUsuario = ['excluido', 'ativo', 'suspenso', 'pendente']
 
 type StatusAvidadesInterface = 'atividade-nao-formulada' | 'atividade-realizada' | 'atividade-enviada' |
   'atividade-devolvida' | 'atividade-recusada' | 'atividade-aprovada'

@@ -34,7 +34,7 @@ export default class UsuariosController {
       await Usuario.create({
         ...dadosCadastro,
         role: rolesEnum[0],
-        status: 0,
+        status: 3,
       })
 
       return response.ok({ mensagem: 'Usuário criado com sucesso' })
@@ -98,26 +98,31 @@ export default class UsuariosController {
   }
 
   public async mudarStatusUsuario({ request, response }: HttpContextContract) {
-    try {
-      const dadosAceitarCadastro = await request.validate({
-        schema: schema.create({
-          nome: schema.string(),
-          email: schema.string({}, [
-            rules.exists({
-              table: 'usuarios', column: 'email',
-            }),
-          ]),
-          role: schema.enum(rolesEnum),
-          status: schema.enum(statusUsuario),
-          cargo: schema.enum.optional(cargosEnum),
-          password: schema.string.optional({}, [rules.minLength(6)]),
-        }),
-      })
+    const dadosAceitarCadastro = await request.validate({
+      schema: schema.create({
+        id: schema.number(),
+        nome: schema.string(),
+        email: schema.string({}, [
+          rules.exists({
+            table: 'usuarios', column: 'email',
+          }),
+        ]),
+        role: schema.enum(rolesEnum),
+        status: schema.enum(statusUsuario),
+        cargo: schema.enum.optional(cargosEnum),
+        capitulo: schema.number(),
+        password: schema.string.optional({}, [rules.minLength(6)]),
+      }),
+    })
 
+    try {
       const dadosAtualizados = {
+        nome: dadosAceitarCadastro.nome,
+        email: dadosAceitarCadastro.email,
         role: dadosAceitarCadastro.role,
         status: statusUsuario.indexOf(dadosAceitarCadastro.status),
         cargo: dadosAceitarCadastro.cargo,
+        capitulo: dadosAceitarCadastro.capitulo,
         password: dadosAceitarCadastro.password && await Hash.make(<any>dadosAceitarCadastro.password),
       }
 
@@ -129,7 +134,7 @@ export default class UsuariosController {
         delete dadosAtualizados.cargo
       }
 
-      await Usuario.query().update(dadosAtualizados).where({ email: dadosAceitarCadastro.email })
+      await Usuario.query().update(dadosAtualizados).where({ id: dadosAceitarCadastro.id })
 
       return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
     } catch (error) {
@@ -200,6 +205,7 @@ export default class UsuariosController {
   }
 
   async getUsuariosAdmin({ request, response }: HttpContextContract) {
+    const filtroStatus = request.input('filtroStatus')
     const usuarios = await Usuario.query().select()
       .where(q => {
         if (request.input('nao-aprovados')) {
@@ -214,8 +220,16 @@ export default class UsuariosController {
           q.orWhereRaw(`LOWER(id_demolay) LIKE '%${request.input('termoBusca')}%'`)
         }
       })
+      .where(q => {
+        if(filtroStatus && statusUsuario.includes(filtroStatus)) {          
+          q.where({ status: statusUsuario.indexOf(filtroStatus) })
+        }
+      })
       .offset(request.input('offset'))
       .limit(10)
+    for (const key in usuarios) {
+      usuarios[key].status = <any> statusUsuario[usuarios[key].status]
+    }
 
     return response.ok(usuarios)
   }
