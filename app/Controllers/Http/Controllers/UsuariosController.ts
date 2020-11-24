@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, cargosEnum } from 'App/Utils/Utils'
+import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 import TipoUserCargos from 'App/Models/TipoUserCargo'
 
@@ -33,7 +33,7 @@ export default class UsuariosController {
 
       await Usuario.create({
         ...dadosCadastro,
-        role: rolesEnum[0],
+        role: rolesEnum[2],
         status: 3,
       })
 
@@ -107,7 +107,7 @@ export default class UsuariosController {
         ]),
         role: schema.enum(rolesEnum),
         status: schema.enum(statusUsuario),
-        cargo: schema.enum.optional(cargosEnum),
+        cargo: schema.string.optional(),
         capitulo: schema.number(),
         password: schema.string.optional({}, [rules.minLength(6)]),
       }),
