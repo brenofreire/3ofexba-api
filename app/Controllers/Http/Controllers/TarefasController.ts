@@ -30,8 +30,6 @@ export default class TarefasController {
         lowerLikeNomeCampanha = termoBusca && `LOWER(nome) LIKE '%${termoBusca}%'` || ''
       }
 
-      console.log('validacaoResumo', validacaoResumo);
-
       const campanhas = await Campanha.query().select('*')
         .count('id', 'quantidade')
         .groupBy('tipo')
@@ -261,8 +259,6 @@ export default class TarefasController {
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
-      console.log(error)
-      
       if (error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0029' })
       }

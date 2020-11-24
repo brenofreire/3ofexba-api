@@ -62,6 +62,9 @@ Route.group(() => {
     
     Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin')
     Route.post('campanhas', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
+
+    Route.get('cargos', 'Controllers/CargosController.getCargos').middleware('authAdmin')
+    Route.post('cargos', 'Controllers/CargosController.setCargos').middleware('authAdmin')
   }).middleware(['authUser', 'authRegional'])
     .prefix('admin')
 })

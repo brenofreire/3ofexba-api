@@ -30,8 +30,6 @@ export default class AgostinhoController {
 
       return response.ok({ mensagem: 'Mensagem enviada com sucesso!' })
     } catch (error) {
-      console.log('Erro enviar mensagem: ', error)
-
       const [rule, field] = getRuleError(error)
       if (rule === 'required') {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0031' })

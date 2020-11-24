@@ -71,8 +71,6 @@ export default class UsuariosController {
         .firstOrFail()
       const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
 
-      console.log(request.input('password'))
-
       if (senhaCorreta) {
         return response.ok({ usuario, token: gerarTokenJWT(usuario) })
       } else {
