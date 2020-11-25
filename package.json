@@ -8,7 +8,7 @@
     "lint": "eslint . --ext=.ts"
   },
   "devDependencies": {
-    "@adonisjs/assembler": "^1.2.1",
+    
     "adonis-preset-ts": "^1.0.4",
     "eslint": "^7.4.0",
     "eslint-plugin-adonis": "^1.0.14",
@@ -18,6 +18,7 @@
     "youch-terminal": "^1.0.0"
   },
   "dependencies": {
+    "@adonisjs/assembler": "^1.2.1",
     "@adonisjs/ace": "^6.9.3",
     "@adonisjs/core": "^5.0.0-preview-rc-1.9",
     "@adonisjs/fold": "^6.3.5",
