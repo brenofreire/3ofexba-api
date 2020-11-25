@@ -1,6 +1,6 @@
 {
   "name": "3ofexba",
-  "version": "0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "node ace build",
