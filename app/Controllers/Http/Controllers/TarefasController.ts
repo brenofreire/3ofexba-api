@@ -30,9 +30,9 @@ export default class TarefasController {
         lowerLikeNomeCampanha = termoBusca && `LOWER(nome) LIKE '%${termoBusca}%'` || ''
       }
 
-      const campanhas = await Campanha.query().select('tipo')
+      const campanhas = await Campanha.query().select('tipo', 'cargo_tarefa')
         .count('id', 'quantidade')
-        .groupBy('tipo')
+        .groupBy('tipo', 'cargo_tarefa')
         .andWhere('data_final_semestre', '>', moment().format('YYYY-MM-DD HH:mm:ss'))
 
       const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tarefas.tipo_campanha', 'tipo_campanhas.nome')
@@ -231,7 +231,7 @@ export default class TarefasController {
     request.updateBody({
       ...request.all(),
       slug: !slugQueJaTem ? slugify(request.input('nome'), { lower: true }) : slugQueJaTem,
-      status: typeof slugQueJaTem !== 'undefined' ? statusQueJaTem : true,
+      status: typeof slugQueJaTem !== 'undefined' ? statusQueJaTem : 1,
     })
 
     try {
