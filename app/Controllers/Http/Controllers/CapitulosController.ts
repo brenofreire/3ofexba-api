@@ -2,7 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Campanha from 'App/Models/Campanha'
 import Capitulo from 'App/Models/Capitulo'
-import { withExtras } from 'App/Utils/Utils'
+import { lowerLike, withExtras } from 'App/Utils/Utils'
 import TipoCampanhasController from './TipoCampanhasController'
 
 export default class CapitulosController {
@@ -53,8 +53,8 @@ export default class CapitulosController {
       const capitulos = await Capitulo.query()
         .where(q => {
           if (dadosBusca.termoBusca) {
-            q.whereRaw(`LOWER(nome) LIKE '%${dadosBusca.termoBusca}%'`)
-            q.orWhereRaw(`LOWER(sigla) LIKE '%${dadosBusca.termoBusca}%'`)
+            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca))
+            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca))
           }
         })
         .andWhere({ ofex: dadosBusca.ofex })
@@ -87,7 +87,7 @@ export default class CapitulosController {
     try {
       const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
       const campanhasAdmin = withExtras(await Campanha.query()
-        .whereRaw(`LOWER(nome) LIKE '%${request.input('termoBusca')}%'`)
+        .whereRaw(lowerLike('nome', request.input('termoBusca')))
         .offset(request.input('offset'))
         .limit(10))
 

@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario } from 'App/Utils/Utils'
+import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, lowerLike } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 import TipoUserCargos from 'App/Models/TipoUserCargo'
 
@@ -212,10 +212,10 @@ export default class UsuariosController {
       })
       .where(q => {
         if(request.input('termoBusca')) {
-          q.whereRaw(`LOWER(nome) LIKE '%${request.input('termoBusca')}%'`)
-          q.orWhereRaw(`LOWER(email) LIKE '%${request.input('termoBusca')}%'`)
-          q.orWhereRaw(`LOWER(capitulo) LIKE '%${request.input('termoBusca')}%'`)
-          q.orWhereRaw(`LOWER(id_demolay) LIKE '%${request.input('termoBusca')}%'`)
+          q.whereRaw(lowerLike('nome', request.input('termoBusca')))
+          q.orWhereRaw(lowerLike('email', request.input('termoBusca')))
+          q.orWhereRaw(lowerLike('capitulo', request.input('termoBusca')))
+          q.orWhereRaw(lowerLike('id_demolay', request.input('termoBusca')))
         }
       })
       .where(q => {
@@ -225,6 +225,7 @@ export default class UsuariosController {
       })
       .offset(request.input('offset'))
       .limit(10)
+
     for (const key in usuarios) {
       usuarios[key].status = <any> statusUsuario[usuarios[key].status]
     }

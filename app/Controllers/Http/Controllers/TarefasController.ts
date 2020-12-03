@@ -6,6 +6,7 @@ import {
   statusAtividadeLabel,
   getRuleError,
   cargosEnum,
+  lowerLike,
 } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
@@ -27,7 +28,7 @@ export default class TarefasController {
             capitulo: schema.string(),
           }),
         })
-        lowerLikeNomeCampanha = termoBusca && `LOWER(nome) LIKE '%${termoBusca}%'` || ''
+        lowerLikeNomeCampanha = termoBusca ? lowerLike('nome', termoBusca) : ''
       }
 
       const campanhas = await Campanha.query().select('tipo', 'cargo_tarefa')

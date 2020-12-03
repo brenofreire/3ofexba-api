@@ -69,3 +69,7 @@ export const parsearArrayStringfadoNoArrayOuObjeto = (valor) => {
 
   return valor
 }
+
+export const lowerLike = (coluna, valor) => {
+  return `cast(${coluna} AS TEXT) ILIKE '%${valor}%'`
+}

@@ -1,6 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema } from '@ioc:Adonis/Core/Validator'
-import { cargosEnum, getRuleError } from 'App/Utils/Utils'
+import { cargosEnum, getRuleError, lowerLike } from 'App/Utils/Utils'
 import Agostinho from 'App/Models/Agostinho'
 
 export default class AgostinhoController {
@@ -54,7 +54,7 @@ export default class AgostinhoController {
       const usuario = request.input('usuario')
       const mensagens = await Agostinho.query().select()
         .offset(Number(opcoesListaMensagens.offset))
-        .whereRaw(`destinatarios LIKE '%${usuario.cargo}%'`)
+        .whereRaw(lowerLike('destinatarios', usuario.cargo))
         .limit(10)
 
       return response.ok(mensagens)
