@@ -11,13 +11,8 @@ export default class UsuariosController {
       const dadosCadastro = await request.validate({
         schema: schema.create({
           nome: schema.string({}, [rules.minLength(3)]),
-          email: schema.string({}, [
-            rules.email(),
-            rules.unique({ table: 'usuarios', column: 'email' }),
-          ]),
-          id_demolay: schema.number([
-            rules.unique({ table: 'usuarios', column: 'id_demolay' }),
-          ]),
+          email: schema.string({}, [rules.email(), rules.unique({ table: 'usuarios', column: 'email' })]),
+          id_demolay: schema.number([rules.unique({ table: 'usuarios', column: 'id_demolay' })]),
           password: schema.string({}, [rules.minLength(6)]),
           capitulo: schema.number(),
         }),
@@ -49,26 +44,27 @@ export default class UsuariosController {
   }
 
   public async login({ request, response }: HttpContextContract) {
+    const dadosCadastro = await request.validate({
+      schema: schema.create({
+        email: schema.string({}, [
+          rules.exists({
+            table: 'usuarios',
+            column: 'email',
+            where: { status: 1 },
+          }),
+        ]),
+        password: schema.string({}, [rules.minLength(6)]),
+      }),
+    })
+    
     try {
-      const dadosCadastro = await request.validate({
-        schema: schema.create({
-          email: schema.string({}, [
-            rules.exists({
-              table: 'usuarios',
-              column: 'email',
-              where: { status: 1 },
-            }),
-          ]),
-          password: schema.string({}, [rules.minLength(6)]),
-        }),
-      })
-
       const usuario = await Usuario.query()
         .where({ email: dadosCadastro.email })
-        .preload('capituloInfo', q => {
+        .preload('capituloInfo', (q) => {
           q.select('nome')
         })
         .firstOrFail()
+
       const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
 
       if (senhaCorreta) {
@@ -91,7 +87,6 @@ export default class UsuariosController {
       } catch (error) {
         return response.badRequest({ mensagem: 'Erro ao fazer login', code: 'err_0005' })
       }
-
     }
   }
 
@@ -102,7 +97,8 @@ export default class UsuariosController {
         nome: schema.string(),
         email: schema.string({}, [
           rules.exists({
-            table: 'usuarios', column: 'email',
+            table: 'usuarios',
+            column: 'email',
           }),
         ]),
         role: schema.enum(rolesEnum),
@@ -121,7 +117,7 @@ export default class UsuariosController {
         status: statusUsuario.indexOf(dadosAceitarCadastro.status),
         cargo: dadosAceitarCadastro.cargo,
         capitulo: dadosAceitarCadastro.capitulo,
-        password: dadosAceitarCadastro.password && await Hash.make(<any>dadosAceitarCadastro.password),
+        password: dadosAceitarCadastro.password && (await Hash.make(<any>dadosAceitarCadastro.password)),
       }
 
       if (!dadosAtualizados.password) {
@@ -153,20 +149,22 @@ export default class UsuariosController {
     const dadosCargo = await request.validate({
       schema: schema.create({
         nome: schema.string(),
-        sigla: !request.input('id') ? schema.string({}, [
-          rules.unique({
-            table: 'tipo_user_cargos',
-            column: 'sigla',
-            where: {
-              sigla: request.input('sigla'),
-            }
-          })
-        ]) : schema.string(),
+        sigla: !request.input('id')
+          ? schema.string({}, [
+              rules.unique({
+                table: 'tipo_user_cargos',
+                column: 'sigla',
+                where: {
+                  sigla: request.input('sigla'),
+                },
+              }),
+            ])
+          : schema.string(),
       }),
       messages: {
-        required: '{{ field }} é obrigatório',
-        enum: '{{ field }} tipo inválido',
-        'slug.unique': 'Atividade já cadastrada'
+        'required': '{{ field }} é obrigatório',
+        'enum': '{{ field }} tipo inválido',
+        'slug.unique': 'Atividade já cadastrada',
       },
     })
     try {
@@ -192,34 +190,35 @@ export default class UsuariosController {
     const tiposCargo = await TipoUserCargos.all()
     const tiposUserCargosEnumReverse = {}
 
-    tiposCargo.forEach(tipo => {
+    tiposCargo.forEach((tipo) => {
       tiposUserCargosEnumReverse[tipo.slug] = tipo.nome
     })
 
     return {
-      tiposUserCargosEnum: tiposCargo.map(item => item.slug),
+      tiposUserCargosEnum: tiposCargo.map((item) => item.slug),
       tiposUserCargosEnumReverse,
     }
   }
 
   async getUsuariosAdmin({ request, response }: HttpContextContract) {
     const filtroStatus = request.input('filtroStatus')
-    const usuarios = await Usuario.query().select()
-      .where(q => {
+    const usuarios = await Usuario.query()
+      .select()
+      .where((q) => {
         if (request.input('nao-aprovados')) {
           q.where({ status: 0 })
         }
       })
-      .where(q => {
-        if(request.input('termoBusca')) {
+      .where((q) => {
+        if (request.input('termoBusca')) {
           q.whereRaw(lowerLike('nome', request.input('termoBusca')))
           q.orWhereRaw(lowerLike('email', request.input('termoBusca')))
           q.orWhereRaw(lowerLike('capitulo', request.input('termoBusca')))
           q.orWhereRaw(lowerLike('id_demolay', request.input('termoBusca')))
         }
       })
-      .where(q => {
-        if(filtroStatus && statusUsuario.includes(filtroStatus)) {          
+      .where((q) => {
+        if (filtroStatus && statusUsuario.includes(filtroStatus)) {
           q.where({ status: statusUsuario.indexOf(filtroStatus) })
         }
       })
@@ -227,7 +226,7 @@ export default class UsuariosController {
       .limit(10)
 
     for (const key in usuarios) {
-      usuarios[key].status = <any> statusUsuario[usuarios[key].status]
+      usuarios[key].status = <any>statusUsuario[usuarios[key].status]
     }
 
     return response.ok(usuarios)
