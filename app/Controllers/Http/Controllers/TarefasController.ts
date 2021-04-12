@@ -1,13 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Campanha from 'App/Models/Campanha'
-import {
-  statusAtividade,
-  withExtras,
-  statusAtividadeLabel,
-  getRuleError,
-  cargosEnum,
-  lowerLike,
-} from '../../../Utils/Utils'
+import { statusAtividade, withExtras, statusAtividadeLabel, getRuleError, cargosEnum, lowerLike } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import TipoCampanhasController from './TipoCampanhasController'
@@ -31,35 +24,41 @@ export default class TarefasController {
         lowerLikeNomeCampanha = termoBusca ? lowerLike('nome', termoBusca) : ''
       }
 
-      const campanhas = await Campanha.query().select('tipo', 'cargo_tarefa')
+      const idCapitulo = validacaoResumo.capitulo || request.input('usuario').capitulo
+
+      const campanhas = await Campanha.query()
+        .select('tipo', 'cargo_tarefa')
         .count('id', 'quantidade')
         .groupBy('tipo', 'cargo_tarefa')
         .andWhere('data_final_semestre', '>', moment().format('YYYY-MM-DD HH:mm:ss'))
 
-      const tarefasDoCapitulo = await Tarefa.query().select('capitulo', 'tarefas.tipo_campanha', 'tipo_campanhas.nome')
+      const tarefasDoCapitulo = await Tarefa.query()
+        .select('capitulo', 'tarefas.tipo_campanha', 'tipo_campanhas.nome')
         .count('tarefas.id', 'concluidas')
         .leftJoin('tipo_campanhas', 'tarefas.tipo_campanha', 'slug')
-        .groupBy('tipo_campanha', 'tarefas.id', 'tipo_campanhas.nome')
+        .groupBy('tipo_campanha', 'tipo_campanhas.nome', 'capitulo')
         .where({
-          capitulo: validacaoResumo.capitulo || request.input('usuario').capitulo,
+          capitulo: idCapitulo,
           status: statusAtividade.indexOf('atividade-aprovada'),
         })
         .whereRaw(lowerLikeNomeCampanha)
 
       if (!campanhas.length) {
-        throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
+        // throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
+        return []
       }
 
       const novoRetorno: any = []
       const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
-      campanhas.map(campanha => {
-        const tarefaInfo = tarefasDoCapitulo.find(tarefa => tarefa.tipo_campanha === campanha.tipo)
+      campanhas.map((campanha) => {
+        const tarefaInfo = tarefasDoCapitulo.find((tarefa) => tarefa.tipo_campanha === campanha.tipo)
         novoRetorno.push({
           nome: TiposCampanhaEnumReverso[campanha.tipo],
           slug: campanha.tipo,
           concluidas: parseInt(tarefaInfo && tarefaInfo.concluidas) || 0,
           ativas: parseInt(campanha.quantidade),
           cargoTarefa: campanha.cargo_tarefa,
+          idCapitulo,
         })
       })
 
@@ -67,31 +66,38 @@ export default class TarefasController {
     } catch (error) {
       console.log(error)
 
-
       const [rule, field] = getRuleError(error)
       if (rule === 'required') {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0017' })
       } else if (error && error.mensagem) {
         return response.badRequest(error)
       } else {
-        return response.badRequest({ mensagem: 'Houve um erro ao listar atividades do capítulo', code: 'err_0011' })
+        return response.badRequest({
+          mensagem: 'Houve um erro ao listar atividades do capítulo',
+          code: 'err_0011',
+        })
       }
     }
   }
 
   public async getCampanhaDetalhada({ request, params, response }: HttpContextContract) {
     if (!params.tipoCampanha) {
-      return response.badRequest({ mensagem: 'Parâmetro [tipoCampanha] não informado', code: 'err_0012' })
+      return response.badRequest({
+        mensagem: 'Parâmetro [tipoCampanha] não informado',
+        code: 'err_0012',
+      })
     }
 
     try {
       const campanhas = withExtras(
-        await Campanha.query().select('*')
+        await Campanha.query()
+          .select('*')
           .where({ tipo: params.tipoCampanha })
           .andWhere('data_final_semestre', '>', moment().format('YYYY-MM-DD HH:mm:ss'))
       )
       const tarefasDoCapitulo = withExtras(
-        await Tarefa.query().select('*')
+        await Tarefa.query()
+          .select('*')
           .where({
             capitulo: request.input('capitulo') || request.input('usuario').capitulo,
             tipoCampanha: params.tipoCampanha,
@@ -99,10 +105,13 @@ export default class TarefasController {
       )
 
       if (!campanhas.length) {
-        throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0013' })
+        throw {
+          mensagem: 'Parece que ainda não tem atividades cadastradas no sistema',
+          code: 'err_0013',
+        }
       }
 
-      campanhas.map(campanha => {
+      campanhas.map((campanha) => {
         const setTarefaNaoRealizada = () => {
           campanha.statusCapitulo = 0
           campanha.statusCapituloSlug = statusAtividade[0]
@@ -111,7 +120,7 @@ export default class TarefasController {
         }
 
         if (tarefasDoCapitulo && tarefasDoCapitulo.length) {
-          tarefasDoCapitulo.find(tarefa => {
+          tarefasDoCapitulo.find((tarefa) => {
             if (tarefa.slug_campanha === campanha.slug) {
               campanha.statusCapitulo = tarefa.status
               campanha.statusCapituloSlug = statusAtividade[tarefa.status]
@@ -134,13 +143,16 @@ export default class TarefasController {
 
       return response.ok({
         tituloTarefa: TiposCampanhaEnumReverso[params.tipoCampanha],
-        tarefas: campanhas
+        tarefas: campanhas,
       })
     } catch (error) {
       if (error && error.mensagem) {
         return response.notFound(error)
       } else {
-        return response.badRequest({ mensagem: 'Houve um erro ao detalhar informações de campanha', code: 'err_0014' })
+        return response.badRequest({
+          mensagem: 'Houve um erro ao detalhar informações de campanha',
+          code: 'err_0014',
+        })
       }
     }
   }
@@ -160,11 +172,13 @@ export default class TarefasController {
         },
       })
 
-      const jaExisteTarefa = await Tarefa.query().where({
-        idDemolay: request.input('usuario').id,
-        slugCampanha: dadosTarefa.slugCampanha,
-        tipoCampanha: dadosTarefa.tipoCampanha,
-      }).first()
+      const jaExisteTarefa = await Tarefa.query()
+        .where({
+          idDemolay: request.input('usuario').id,
+          slugCampanha: dadosTarefa.slugCampanha,
+          tipoCampanha: dadosTarefa.tipoCampanha,
+        })
+        .first()
 
       if (jaExisteTarefa) {
         return response.ok({ mensagem: 'Atividade já cadastrada' })
@@ -184,7 +198,10 @@ export default class TarefasController {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0024' })
       }
 
-      return response.badRequest({ mensagem: 'Houve um erro ao cadastar nova atividade', code: 'err_0020' })
+      return response.badRequest({
+        mensagem: 'Houve um erro ao cadastar nova atividade',
+        code: 'err_0020',
+      })
     }
   }
 
@@ -193,27 +210,34 @@ export default class TarefasController {
       const usuario = request.input('usuario')
       const dadosTarefa = await request.validate({
         schema: schema.create({
-          idTarefa: schema.number([rules.exists({
-            column: 'id',
-            table: 'tarefas',
-            where: { id_demolay: usuario.id }
-          })]),
+          idTarefa: schema.number([
+            rules.exists({
+              column: 'id',
+              table: 'tarefas',
+              where: { id_demolay: usuario.id },
+            }),
+          ]),
           status: schema.enum(statusAtividade),
         }),
         messages: {
           required: '{{ field }} é obrigatório',
           enum: '{{ field }} é está com o tipo errado',
-          exists: 'Atividade não encontrada ou não pertence a você'
+          exists: 'Atividade não encontrada ou não pertence a você',
         },
       })
 
       if (['comum', 'regional'].includes(usuario.role) && statusAtividade.indexOf(dadosTarefa.status) > 2) {
-        return response.badRequest({ mensagem: 'Você não pode realizar essa ação', code: 'err_0026' })
+        return response.badRequest({
+          mensagem: 'Você não pode realizar essa ação',
+          code: 'err_0026',
+        })
       }
 
-      await Tarefa.query().update({
-        status: statusAtividade.indexOf(dadosTarefa.status)
-      }).where({ id: dadosTarefa.idTarefa })
+      await Tarefa.query()
+        .update({
+          status: statusAtividade.indexOf(dadosTarefa.status),
+        })
+        .where({ id: dadosTarefa.idTarefa })
 
       return response.ok({ mensagem: 'Atividade atualizada com sucesso' })
     } catch (error) {
@@ -221,7 +245,10 @@ export default class TarefasController {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0027' })
       }
 
-      return response.badRequest({ mensagem: 'Houve um erro ao atualizar atividade', code: 'err_0028' })
+      return response.badRequest({
+        mensagem: 'Houve um erro ao atualizar atividade',
+        code: 'err_0028',
+      })
     }
   }
 
@@ -240,12 +267,14 @@ export default class TarefasController {
       const dadosTarefa = await request.validate({
         schema: schema.create({
           nome: schema.string(),
-          slug: !request.input('id') ? schema.string({}, [
-            rules.unique({
-              table: 'campanhas',
-              column: 'slug',
-            })
-          ]) : schema.string(),
+          slug: !request.input('id')
+            ? schema.string({}, [
+                rules.unique({
+                  table: 'campanhas',
+                  column: 'slug',
+                }),
+              ])
+            : schema.string(),
           tipo: schema.enum(TiposCampanhaEnum),
           cargo_tarefa: schema.enum(cargosEnum),
           data_entrega: schema.date({ format: 'yyyy-LL-dd HH:mm:ss' }),
@@ -253,15 +282,18 @@ export default class TarefasController {
           status: schema.number(),
         }),
         messages: {
-          required: '{{ field }} é obrigatório',
-          enum: '{{ field }} tipo inválido',
-          'slug.unique': 'Atividade já cadastrada'
+          'required': '{{ field }} é obrigatório',
+          'enum': '{{ field }} tipo inválido',
+          'slug.unique': 'Atividade já cadastrada',
         },
       })
 
-      await Campanha.updateOrCreate({
-        slug: request.input('slug'),
-      }, JSON.parse(JSON.stringify(dadosTarefa)))
+      await Campanha.updateOrCreate(
+        {
+          slug: request.input('slug'),
+        },
+        JSON.parse(JSON.stringify(dadosTarefa))
+      )
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
@@ -269,7 +301,10 @@ export default class TarefasController {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0038' })
       }
 
-      return response.badRequest({ mensagem: 'Houve um erro ao cadastar nova campanha', code: 'err_0030' })
+      return response.badRequest({
+        mensagem: 'Houve um erro ao cadastar nova campanha',
+        code: 'err_0030',
+      })
     }
   }
 
