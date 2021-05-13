@@ -174,7 +174,7 @@ export default class TarefasController {
 
       const jaExisteTarefa = await Tarefa.query()
         .where({
-          idDemolay: request.input('usuario').id,
+          idDm: request.input('usuario').id,
           slugCampanha: dadosTarefa.slugCampanha,
           tipoCampanha: dadosTarefa.tipoCampanha,
         })
@@ -187,7 +187,7 @@ export default class TarefasController {
           slugCampanha: dadosTarefa.slugCampanha,
           tipoCampanha: dadosTarefa.tipoCampanha,
           capitulo: request.input('usuario').capitulo,
-          idDemolay: request.input('usuario').id,
+          idDm: request.input('usuario').id,
           status: statusAtividade.indexOf(request.input('status') || 'atividade-nao-formulada'),
         })
 

@@ -12,14 +12,14 @@ export default class UsuariosController {
         schema: schema.create({
           nome: schema.string({}, [rules.minLength(3)]),
           email: schema.string({}, [rules.email(), rules.unique({ table: 'usuarios', column: 'email' })]),
-          id_demolay: schema.number([rules.unique({ table: 'usuarios', column: 'id_demolay' })]),
+          id_dm: schema.number([rules.unique({ table: 'usuarios', column: 'id_dm' })]),
           password: schema.string({}, [rules.minLength(6)]),
           capitulo: schema.number(),
         }),
         messages: {
           'email.unique': 'Email já registrado no sistema',
           'email.email': 'Email inválido',
-          'id_demolay.unique': 'ID Demolay já regsitrado no sistema',
+          'id_dm.unique': 'ID já regsitrado no sistema',
           'password.minLength': 'Senha deve ter no mínimo 6 caracteres',
           'capitulo.required': 'O número do capítulo é obrigatório',
           'nome.minLength': 'O nome deve ter ao menos 3 letras',
@@ -56,7 +56,7 @@ export default class UsuariosController {
         password: schema.string({}, [rules.minLength(6)]),
       }),
     })
-    
+
     try {
       const usuario = await Usuario.query()
         .where({ email: dadosCadastro.email })

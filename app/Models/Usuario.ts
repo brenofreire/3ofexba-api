@@ -12,7 +12,7 @@ export default class Usuario extends BaseModel {
   public nome: string
 
   @column()
-  public idDemolay: number
+  public idDm: number
 
   @column()
   public email: string
@@ -37,7 +37,7 @@ export default class Usuario extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
-  
+
   @belongsTo(() => Capitulo, {
     localKey: 'numero',
     foreignKey: 'capitulo',
@@ -46,7 +46,7 @@ export default class Usuario extends BaseModel {
 
   @beforeUpdate()
   @beforeSave()
-  public static async hashPassword (user: Usuario) {
+  public static async hashPassword(user: Usuario) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)
     }

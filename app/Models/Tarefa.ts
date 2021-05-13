@@ -12,7 +12,7 @@ export default class Tarefa extends BaseModel {
   public tipoCampanha
 
   @column()
-  public idDemolay: number
+  public idDm: number
 
   @column()
   public capitulo: number
