@@ -214,7 +214,7 @@ export default class UsuariosController {
           q.whereRaw(lowerLike('nome', request.input('termoBusca')))
           q.orWhereRaw(lowerLike('email', request.input('termoBusca')))
           q.orWhereRaw(lowerLike('capitulo', request.input('termoBusca')))
-          q.orWhereRaw(lowerLike('id_demolay', request.input('termoBusca')))
+          q.orWhereRaw(lowerLike('id_dm', request.input('termoBusca')))
         }
       })
       .where((q) => {

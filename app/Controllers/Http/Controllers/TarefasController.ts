@@ -208,15 +208,18 @@ export default class TarefasController {
   public async editarTarefa({ request, response }: HttpContextContract) {
     try {
       const usuario = request.input('usuario')
+      const isAdmin = usuario.role === 'admin'
       const dadosTarefa = await request.validate({
         schema: schema.create({
-          idTarefa: schema.number([
-            rules.exists({
-              column: 'id',
-              table: 'tarefas',
-              where: { id_demolay: usuario.id },
-            }),
-          ]),
+          idTarefa: isAdmin
+            ? schema.number()
+            : schema.number([
+                rules.exists({
+                  column: 'id',
+                  table: 'tarefas',
+                  where: { id_dm: usuario.id },
+                }),
+              ]),
           status: schema.enum(statusAtividade),
         }),
         messages: {

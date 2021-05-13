@@ -3,12 +3,12 @@ import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 export default class Usuarios extends BaseSchema {
   protected tableName = 'usuarios'
 
-  public async up () {
+  public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
       table.string('nome').notNullable()
-      table.integer('id_demolay').unique().notNullable()
+      table.integer('id_dm').unique().notNullable()
       table.string('email').unique().notNullable()
       table.string('password').notNullable()
       table.integer('capitulo').notNullable()
@@ -21,7 +21,7 @@ export default class Usuarios extends BaseSchema {
     })
   }
 
-  public async down () {
+  public async down() {
     this.schema.dropTable(this.tableName)
   }
 }
