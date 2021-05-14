@@ -42,14 +42,13 @@ const databaseConfig: DatabaseConfig & { orm: Partial<OrmConfig> } = {
         user: Env.get('PG_USER'),
         password: Env.get('PG_PASSWORD', ''),
         database: Env.get('PG_DB_NAME'),
-        // ssl: {
-        //   rejectUnauthorized: false
-        // }
+        ssl: {
+          rejectUnauthorized: false,
+        },
       },
       healthCheck: false,
-			debug: false,
+      debug: false,
     },
-
   },
 
   /*
@@ -64,8 +63,7 @@ const databaseConfig: DatabaseConfig & { orm: Partial<OrmConfig> } = {
   | - Or define a custom function to compute the primary key for a given model.
   |
   */
-  orm: {
-  },
+  orm: {},
 }
 
 export default databaseConfig
