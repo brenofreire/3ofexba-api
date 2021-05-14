@@ -43,6 +43,20 @@ export default class TarefasController {
         })
         .whereRaw(lowerLikeNomeCampanha)
 
+      console.log(
+        await Tarefa.query()
+          .select('capitulo', 'tarefas.tipo_campanha', 'tipo_campanhas.nome')
+          .count('tarefas.id', 'concluidas')
+          .leftJoin('tipo_campanhas', 'tarefas.tipo_campanha', 'slug')
+          .groupBy('tipo_campanha', 'tipo_campanhas.nome', 'capitulo')
+          .where({
+            capitulo: idCapitulo,
+            status: statusAtividade.indexOf('atividade-aprovada'),
+          })
+          .whereRaw(lowerLikeNomeCampanha)
+          .toQuery()
+      )
+
       if (!campanhas.length) {
         // throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
         return []
@@ -291,12 +305,14 @@ export default class TarefasController {
         },
       })
 
-      await Campanha.updateOrCreate(
-        {
-          slug: request.input('slug'),
-        },
-        JSON.parse(JSON.stringify(dadosTarefa))
+      const dadosToUpdate = JSON.parse(
+        JSON.stringify({
+          ...dadosTarefa,
+          slug: undefined,
+        })
       )
+
+      await Campanha.updateOrCreate({ slug: request.input('slug') }, dadosToUpdate)
 
       return response.ok({ mensagem: 'Ação realizada com sucesso' })
     } catch (error) {
