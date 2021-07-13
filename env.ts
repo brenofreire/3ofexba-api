@@ -26,10 +26,5 @@ export default Env.rules({
   MYSQL_DB_NAME: Env.schema.string(),
   MYSQL_ENV: Env.schema.string(),
   MYSQL_PORT: Env.schema.number(),
-  DB_HOST: Env.schema.string(),
-  DB_USER: Env.schema.string(),
-  DB_PASSWORD: Env.schema.string(),
-  DB_NAME: Env.schema.string(),
-  DB_ENV: Env.schema.string(),
   DB_CONNECTION: Env.schema.string(),
 })
