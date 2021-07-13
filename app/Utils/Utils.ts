@@ -28,6 +28,12 @@ export const statusAtividadeLabel = [
 
 export type UserCargos = 'mc' | 'esc' | 'tes' | 'hos' // MODEL
 export const cargosEnum: UserCargos[] = ['mc', 'esc', 'tes', 'hos'] // MODEL
+export const cargosEnumObj = {
+  mc: 'Mestre Conselheiro',
+  esc: 'Escrivão',
+  hos: 'Hospitaleiro',
+  tes: 'Tesoureiro',
+}
 
 export type UserRoles = 'admin' | 'regional' | 'comum'
 export const rolesEnum: UserRoles[] = ['admin', 'regional', 'comum']

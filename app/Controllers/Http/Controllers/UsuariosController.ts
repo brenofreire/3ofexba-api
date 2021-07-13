@@ -234,8 +234,6 @@ export default class UsuariosController {
   }
 
   async getIdDmByCargo(cargo: UserCargos, capitulo: number) {
-    console.log({ cargo, capitulo })
-
     const usuario = withExtras(
       await Usuario.query()
         .select('id_dm')

@@ -1,6 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Campanha from 'App/Models/Campanha'
-import { statusAtividade, withExtras, statusAtividadeLabel, getRuleError, cargosEnum, lowerLike } from '../../../Utils/Utils'
+import { statusAtividade, withExtras, statusAtividadeLabel, getRuleError, cargosEnum, lowerLike, cargosEnumObj } from '../../../Utils/Utils'
 import Tarefa from 'App/Models/Tarefa'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import TipoCampanhasController from './TipoCampanhasController'
@@ -181,7 +181,9 @@ export default class TarefasController {
       const idDm: number = isAdmin ? await this.usuariosCtrl.getIdDmByCargo(dadosTarefa.cargo, dadosTarefa.idCapitulo) : usuario.id
 
       if (isAdmin && !idDm) {
-        throw { mensagem: 'Cargo não registrado pra essa atividade' }
+        const cargo = cargosEnumObj[dadosTarefa.cargo]
+
+        throw { mensagem: ['Cargo não registrado pra essa atividade.', `Vá no menu de cadastros e selecione um ${cargo} pra esse capitulo`] }
       }
 
       const jaExisteTarefa = await Tarefa.query()
@@ -208,6 +210,8 @@ export default class TarefasController {
     } catch (error) {
       if (error && error.messages && error.messages.errors) {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0024' })
+      } else if (error && error.mensagem) {
+        return response.badRequest(error)
       }
 
       return response.badRequest({
