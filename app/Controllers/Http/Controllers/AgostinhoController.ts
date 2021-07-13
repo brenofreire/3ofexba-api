@@ -2,16 +2,15 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema } from '@ioc:Adonis/Core/Validator'
 import { cargosEnum, getRuleError, lowerLike } from 'App/Utils/Utils'
 import Agostinho from 'App/Models/Agostinho'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class AgostinhoController {
   public async enviarMensagem({ request, response }: HttpContextContract) {
     const dadosMensagem = await request.validate({
       schema: schema.create({
         mensagem: schema.string(),
-        destinatarios: schema.array().members(
-          schema.enum(cargosEnum)
-        ),
-        remetente: schema.number()
+        destinatarios: schema.array().members(schema.enum(cargosEnum)),
+        remetente: schema.number(),
       }),
       messages: {
         required: '{{ field }} é obrigatório',
@@ -21,7 +20,7 @@ export default class AgostinhoController {
 
     try {
       for (const key in dadosMensagem) {
-        if(Array.isArray(dadosMensagem[key])) {
+        if (Array.isArray(dadosMensagem[key])) {
           dadosMensagem[key] = JSON.stringify(dadosMensagem[key])
         }
       }
@@ -52,16 +51,17 @@ export default class AgostinhoController {
 
     try {
       const usuario = request.input('usuario')
-      const mensagens = await Agostinho.query().select()
+      const mensagens = await Agostinho.query()
+        .select()
         .offset(Number(opcoesListaMensagens.offset))
-        .whereRaw(lowerLike('destinatarios', usuario.cargo))
+        .whereRaw(lowerLike('destinatarios', usuario.cargo), Env.get('DB_CONNECTION') as any)
         .limit(10)
 
       return response.ok(mensagens)
     } catch (error) {
       return response.internalServerError({
         mensagem: 'Houve um erro inesperado ao listar mensagens',
-        code: 'err_0033'
+        code: 'err_0033',
       })
     }
   }

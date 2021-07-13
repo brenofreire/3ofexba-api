@@ -1,9 +1,10 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, lowerLike } from 'App/Utils/Utils'
+import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, lowerLike, UserCargos, withExtras } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 import TipoUserCargos from 'App/Models/TipoUserCargo'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class UsuariosController {
   public async cadastro({ request, response }: HttpContextContract) {
@@ -211,10 +212,10 @@ export default class UsuariosController {
       })
       .where((q) => {
         if (request.input('termoBusca')) {
-          q.whereRaw(lowerLike('nome', request.input('termoBusca')))
-          q.orWhereRaw(lowerLike('email', request.input('termoBusca')))
-          q.orWhereRaw(lowerLike('capitulo', request.input('termoBusca')))
-          q.orWhereRaw(lowerLike('id_dm', request.input('termoBusca')))
+          q.whereRaw(lowerLike('nome', request.input('termoBusca'), Env.get('DB_CONNECTION') as any))
+          q.orWhereRaw(lowerLike('email', request.input('termoBusca'), Env.get('DB_CONNECTION') as any))
+          q.orWhereRaw(lowerLike('capitulo', request.input('termoBusca'), Env.get('DB_CONNECTION') as any))
+          q.orWhereRaw(lowerLike('id_dm', request.input('termoBusca'), Env.get('DB_CONNECTION') as any))
         }
       })
       .where((q) => {
@@ -230,5 +231,19 @@ export default class UsuariosController {
     }
 
     return response.ok(usuarios)
+  }
+
+  async getIdDmByCargo(cargo: UserCargos, capitulo: number) {
+    console.log({ cargo, capitulo })
+
+    const usuario = withExtras(
+      await Usuario.query()
+        .select('id_dm')
+        .where({ cargo, capitulo, status: 1 } as Usuario)
+        .orderBy('updated_at', 'desc')
+        .first()
+    )
+
+    return usuario && usuario.id_dm
   }
 }

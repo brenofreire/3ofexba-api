@@ -2,15 +2,28 @@ import jwt from 'jsonwebtoken'
 
 export const statusUsuario = ['excluido', 'ativo', 'suspenso', 'pendente']
 
-type StatusAvidadesInterface = 'atividade-nao-formulada' | 'atividade-realizada' | 'atividade-enviada' |
-  'atividade-devolvida' | 'atividade-recusada' | 'atividade-aprovada'
+type StatusAvidadesInterface =
+  | 'atividade-nao-formulada'
+  | 'atividade-realizada'
+  | 'atividade-enviada'
+  | 'atividade-devolvida'
+  | 'atividade-recusada'
+  | 'atividade-aprovada'
 export const statusAtividade: StatusAvidadesInterface[] = [
-  'atividade-nao-formulada', 'atividade-realizada', 'atividade-enviada',
-  'atividade-devolvida', 'atividade-recusada', 'atividade-aprovada',
+  'atividade-nao-formulada',
+  'atividade-realizada',
+  'atividade-enviada',
+  'atividade-devolvida',
+  'atividade-recusada',
+  'atividade-aprovada',
 ]
 export const statusAtividadeLabel = [
-  'Atividade não formulada', 'Atividade realizada', 'Atividade enviada',
-  'Atividade devolvida', 'Atividade recusada', 'Atividade aprovada',
+  'Atividade não formulada',
+  'Atividade realizada',
+  'Atividade enviada',
+  'Atividade devolvida',
+  'Atividade recusada',
+  'Atividade aprovada',
 ]
 
 export type UserCargos = 'mc' | 'esc' | 'tes' | 'hos' // MODEL
@@ -23,7 +36,7 @@ export const getRuleError = (error) => {
   return error.messages && error.messages.errors && [error.messages.errors[0].rule, error.messages.errors[0].field]
 }
 
-export const gerarTokenJWT = (params: { id, email, capitulo, role, status, password?}) => {
+export const gerarTokenJWT = (params: { id; email; capitulo; role; status; password? }) => {
   if (params.password) {
     delete params.password
   }
@@ -52,24 +65,26 @@ export const withExtras = (objeto) => {
 export const parsearArrayStringfadoNoArrayOuObjeto = (valor) => {
   valor = withExtras(valor)
 
-  if(!Array.isArray(valor)) {
+  if (!Array.isArray(valor)) {
     valor = [valor]
   }
 
   for (const chave in valor) {
     for (const key in valor[chave]) {
-      try {      
+      try {
         valor[chave][key] = JSON.parse(valor[chave][key])
       } catch (error) {
-        valor[chave][key] = valor[chave][key]      
+        valor[chave][key] = valor[chave][key]
       }
     }
   }
 
-
   return valor
 }
 
-export const lowerLike = (coluna, valor) => {
+export const lowerLike = (coluna, valor, engine?: 'mysql' | 'pg') => {
+  if (engine && engine === 'mysql') {
+    return `lower(${coluna}) LIKE lower('%${valor}%')`
+  }
   return `cast(${coluna} AS TEXT) ILIKE '%${valor}%'`
 }

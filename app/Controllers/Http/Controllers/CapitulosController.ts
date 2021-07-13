@@ -3,6 +3,7 @@ import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Campanha from 'App/Models/Campanha'
 import Capitulo from 'App/Models/Capitulo'
 import { lowerLike, withExtras } from 'App/Utils/Utils'
+import Env from '@ioc:Adonis/Core/Env'
 import TipoCampanhasController from './TipoCampanhasController'
 
 export default class CapitulosController {
@@ -51,10 +52,10 @@ export default class CapitulosController {
       })
 
       const capitulos = await Capitulo.query()
-        .where(q => {
+        .where((q) => {
           if (dadosBusca.termoBusca) {
-            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca))
-            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca))
+            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca), Env.get('DB_CONNECTION') as any)
+            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca), Env.get('DB_CONNECTION') as any)
           }
         })
         .andWhere({ ofex: dadosBusca.ofex })
@@ -72,8 +73,7 @@ export default class CapitulosController {
 
   async getRegioes({ response }: HttpContextContract) {
     try {
-      const regioes = await (await Capitulo.query().select('ofex').groupBy('ofex'))
-        .map(regiao => regiao.ofex)
+      const regioes = await (await Capitulo.query().select('ofex').groupBy('ofex')).map((regiao) => regiao.ofex)
 
       return response.ok(regioes)
     } catch (error) {
@@ -86,10 +86,12 @@ export default class CapitulosController {
   async getCampanhasAdmin({ request, response }: HttpContextContract) {
     try {
       const TiposCampanhaEnumReverso = (await this.tiposCampanhaCtrl.getTipoCampanhas()).TiposCampanhaEnumReverso
-      const campanhasAdmin = withExtras(await Campanha.query()
-        .whereRaw(lowerLike('nome', request.input('termoBusca')))
-        .offset(request.input('offset'))
-        .limit(10))
+      const campanhasAdmin = withExtras(
+        await Campanha.query()
+          .whereRaw(lowerLike('nome', request.input('termoBusca'), Env.get('DB_CONNECTION') as any))
+          .offset(request.input('offset'))
+          .limit(10)
+      )
 
       for (const item in campanhasAdmin) {
         campanhasAdmin[item]['tipoLabel'] = TiposCampanhaEnumReverso[campanhasAdmin[item].tipo]

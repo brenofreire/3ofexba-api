@@ -6,9 +6,13 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import TipoCampanhasController from './TipoCampanhasController'
 import moment from 'moment'
 import slugify from 'slugify'
+import Env from '@ioc:Adonis/Core/Env'
+import UsuariosController from './UsuariosController'
 
 export default class TarefasController {
   private tiposCampanhaCtrl = new TipoCampanhasController()
+  private usuariosCtrl = new UsuariosController()
+
   public async getResumoCampanhas({ request, response }: HttpContextContract) {
     try {
       let validacaoResumo: any = {}
@@ -21,7 +25,7 @@ export default class TarefasController {
             capitulo: schema.string(),
           }),
         })
-        lowerLikeNomeCampanha = termoBusca ? lowerLike('nome', termoBusca) : ''
+        lowerLikeNomeCampanha = termoBusca ? lowerLike('nome', termoBusca, Env.get('DB_CONNECTION') as any) : ''
       }
 
       const idCapitulo = validacaoResumo.capitulo || request.input('usuario').capitulo
@@ -42,20 +46,6 @@ export default class TarefasController {
           status: statusAtividade.indexOf('atividade-aprovada'),
         })
         .whereRaw(lowerLikeNomeCampanha)
-
-      console.log(
-        await Tarefa.query()
-          .select('capitulo', 'tarefas.tipo_campanha', 'tipo_campanhas.nome')
-          .count('tarefas.id', 'concluidas')
-          .leftJoin('tipo_campanhas', 'tarefas.tipo_campanha', 'slug')
-          .groupBy('tipo_campanha', 'tipo_campanhas.nome', 'capitulo')
-          .where({
-            capitulo: idCapitulo,
-            status: statusAtividade.indexOf('atividade-aprovada'),
-          })
-          .whereRaw(lowerLikeNomeCampanha)
-          .toQuery()
-      )
 
       if (!campanhas.length) {
         // throw ({ mensagem: 'Parece que ainda não tem atividades cadastradas no sistema', code: 'err_0010' })
@@ -78,8 +68,6 @@ export default class TarefasController {
 
       return response.ok(novoRetorno)
     } catch (error) {
-      console.log(error)
-
       const [rule, field] = getRuleError(error)
       if (rule === 'required') {
         return response.badRequest({ mensagem: `${field} inválido`, code: 'err_0017' })
@@ -103,7 +91,7 @@ export default class TarefasController {
     }
 
     try {
-      const campanhas = withExtras(
+      let campanhas = withExtras(
         await Campanha.query()
           .select('*')
           .where({ tipo: params.tipoCampanha })
@@ -125,7 +113,8 @@ export default class TarefasController {
         }
       }
 
-      campanhas.map((campanha) => {
+      campanhas = campanhas.map((campanha) => {
+        campanha.idCapitulo = +request.input('capitulo')
         const setTarefaNaoRealizada = () => {
           campanha.statusCapitulo = 0
           campanha.statusCapituloSlug = statusAtividade[0]
@@ -178,17 +167,26 @@ export default class TarefasController {
         schema: schema.create({
           slugCampanha: schema.string(),
           tipoCampanha: schema.enum(TiposCampanhaEnum),
+          idCapitulo: schema.number(),
           status: schema.string.optional(),
+          cargo: schema.enum(cargosEnum),
         }),
         messages: {
           required: '{{ field }} é obrigatório',
           enum: '{{ field }} tipo inválido',
         },
       })
+      const usuario = request.input('usuario')
+      const isAdmin = usuario.role === 'admin'
+      const idDm: number = isAdmin ? await this.usuariosCtrl.getIdDmByCargo(dadosTarefa.cargo, dadosTarefa.idCapitulo) : usuario.id
+
+      if (isAdmin && !idDm) {
+        throw { mensagem: 'Cargo não registrado pra essa atividade' }
+      }
 
       const jaExisteTarefa = await Tarefa.query()
         .where({
-          idDm: request.input('usuario').id,
+          idDm,
           slugCampanha: dadosTarefa.slugCampanha,
           tipoCampanha: dadosTarefa.tipoCampanha,
         })
@@ -200,8 +198,8 @@ export default class TarefasController {
         await Tarefa.create({
           slugCampanha: dadosTarefa.slugCampanha,
           tipoCampanha: dadosTarefa.tipoCampanha,
-          capitulo: request.input('usuario').capitulo,
-          idDm: request.input('usuario').id,
+          capitulo: dadosTarefa.idCapitulo,
+          idDm,
           status: statusAtividade.indexOf(request.input('status') || 'atividade-nao-formulada'),
         })
 

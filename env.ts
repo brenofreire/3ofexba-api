@@ -31,4 +31,5 @@ export default Env.rules({
   DB_PASSWORD: Env.schema.string(),
   DB_NAME: Env.schema.string(),
   DB_ENV: Env.schema.string(),
+  DB_CONNECTION: Env.schema.string(),
 })
