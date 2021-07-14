@@ -31,13 +31,13 @@ Route.group(() => {
       Route.get(':tipoCampanha', 'Controllers/TarefasController.getCampanhaDetalhada')
       Route.get('', 'Controllers/TarefasController.getResumoCampanhas')
     }).middleware(['authUser'])
-  })
-    .prefix('campanhas')
+  }).prefix('campanhas')
 
   Route.group(() => {
     Route.post('', 'Controllers/TarefasController.enviarTarefa')
     Route.post('editar', 'Controllers/TarefasController.editarTarefa')
-  }).middleware(['authUser'])
+  })
+    .middleware(['authUser'])
     .prefix('tarefas')
 
   Route.group(() => {
@@ -46,34 +46,36 @@ Route.group(() => {
     }).middleware(['authAdmin'])
 
     Route.get('', 'Controllers/AgostinhoController.getMensagens')
-  }).middleware(['authUser'])
+  })
+    .middleware(['authUser'])
     .prefix('agostinho')
 
   Route.group(() => {
+    Route.post('todos', 'Controllers/CapitulosController.buscarTodosCapitulos')
     Route.get('', 'Controllers/CapitulosController.buscarCapitulo').middleware('authRegional')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
-  }).middleware(['authUser'])
+  })
+    .middleware(['authUser'])
     .prefix('capitulos')
 
   Route.group(() => {
     Route.get('regioes', 'Controllers/CapitulosController.getRegioes')
-    
+
     Route.get('usuarios', 'Controllers/UsuariosController.getUsuariosAdmin').middleware('authAdmin')
     Route.post('usuarios', 'Controllers/UsuariosController.mudarStatusUsuario')
-    
+
     Route.get('campanhas', 'Controllers/CapitulosController.getCampanhasAdmin')
     Route.post('campanhas', 'Controllers/TarefasController.cadastrarCampanha').middleware('authAdmin')
 
     Route.get('cargos', 'Controllers/CargosController.getCargos').middleware('authAdmin')
     Route.post('cargos', 'Controllers/CargosController.setCargos').middleware('authAdmin')
-  }).middleware(['authUser', 'authRegional'])
+  })
+    .middleware(['authUser', 'authRegional'])
     .prefix('admin')
 })
 
 Route.get('health', async ({ response }) => {
   const report = await HealthCheck.getReport()
 
-  return report.healthy
-    ? response.ok(report)
-    : response.badRequest(report)
+  return report.healthy ? response.ok(report) : response.badRequest(report)
 })

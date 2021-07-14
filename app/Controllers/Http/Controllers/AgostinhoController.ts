@@ -54,7 +54,7 @@ export default class AgostinhoController {
       const mensagens = await Agostinho.query()
         .select()
         .offset(Number(opcoesListaMensagens.offset))
-        .whereRaw(lowerLike('destinatarios', usuario.cargo), Env.get('DB_CONNECTION') as any)
+        .whereRaw(lowerLike('destinatarios', usuario.cargo, Env.get('DB_CONNECTION') as any))
         .limit(10)
 
       return response.ok(mensagens)

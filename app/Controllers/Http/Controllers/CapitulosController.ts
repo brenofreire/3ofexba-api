@@ -54,8 +54,8 @@ export default class CapitulosController {
       const capitulos = await Capitulo.query()
         .where((q) => {
           if (dadosBusca.termoBusca) {
-            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca), Env.get('DB_CONNECTION') as any)
-            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca), Env.get('DB_CONNECTION') as any)
+            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca, Env.get('DB_CONNECTION') as any))
+            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca, Env.get('DB_CONNECTION') as any))
           }
         })
         .andWhere({ ofex: dadosBusca.ofex })
@@ -68,6 +68,35 @@ export default class CapitulosController {
         return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0022' })
       }
       return response.badRequest({ mensagem: 'Erro ao buscar capítulos', code: 'err_0021' })
+    }
+  }
+
+  public async buscarTodosCapitulos({ request, response }: HttpContextContract) {
+    try {
+      const dadosBusca = await request.validate({
+        schema: schema.create({
+          termoBusca: schema.string.optional(),
+        }),
+      })
+
+      const capitulos = await Capitulo.query()
+        .where((q) => {
+          if (dadosBusca.termoBusca) {
+            q.whereRaw(lowerLike('nome', dadosBusca.termoBusca, Env.get('DB_CONNECTION') as any))
+            q.orWhereRaw(lowerLike('sigla', dadosBusca.termoBusca, Env.get('DB_CONNECTION') as any))
+          }
+        })
+        .limit(10)
+        .offset(request.input('offset') || 0)
+
+      return response.ok(capitulos)
+    } catch (error) {
+      console.log({ error })
+
+      if (error && error.messages && error.messages.errors) {
+        return response.badRequest({ mensagem: error.messages.errors[0].message, code: 'err_0039' })
+      }
+      return response.badRequest({ mensagem: 'Erro ao buscar capítulos', code: 'err_0040' })
     }
   }
 
