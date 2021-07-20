@@ -96,7 +96,7 @@ export const lowerLike = (coluna, valor, engine?: 'mysql' | 'pg') => {
 }
 
 const crypto = require('crypto')
-const mykey = crypto.createCipher('aes-128-cbc', 'process.env.JWT_SECRET')
+const mykey = crypto.createCipher('aes-128-cbc', process.env.JWT_SECRET)
 
 export const cryptPassword = (password, callback) => {
   let mystr = mykey.update(password, 'utf8', 'hex')
