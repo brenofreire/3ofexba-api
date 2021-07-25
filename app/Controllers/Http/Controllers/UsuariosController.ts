@@ -1,17 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { rules, schema } from '@ioc:Adonis/Core/Validator'
 import Usuario from 'App/Models/Usuario'
-import {
-  getRuleError,
-  rolesEnum,
-  gerarTokenJWT,
-  statusUsuario,
-  lowerLike,
-  UserCargos,
-  withExtras,
-  comparePassword,
-  cryptPassword,
-} from 'App/Utils/Utils'
+import { getRuleError, rolesEnum, gerarTokenJWT, statusUsuario, lowerLike, UserCargos, withExtras } from 'App/Utils/Utils'
 import Hash from '@ioc:Adonis/Core/Hash'
 import TipoUserCargos from 'App/Models/TipoUserCargo'
 import Env from '@ioc:Adonis/Core/Env'
@@ -76,13 +66,13 @@ export default class UsuariosController {
         })
         .firstOrFail()
 
-      comparePassword(usuario.password, request.input('password'), (err) => {
-        if (!err) {
-          return response.ok({ usuario, token: gerarTokenJWT(usuario) })
-        } else {
-          throw { mensagem: 'Credenciais incorretas' }
-        }
-      })
+      const senhaCorreta = await Hash.verify(usuario.password, request.input('password'))
+
+      if (senhaCorreta) {
+        return response.ok({ usuario, token: gerarTokenJWT(usuario) })
+      } else {
+        throw { mensagem: 'Credenciais incorretas' }
+      }
     } catch (error) {
       if (error && error.mensagem) {
         return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
@@ -121,33 +111,27 @@ export default class UsuariosController {
     })
 
     try {
-      cryptPassword(dadosAceitarCadastro.password, async (err, hash) => {
-        if (!err) {
-          const dadosAtualizados = {
-            nome: dadosAceitarCadastro.nome,
-            email: dadosAceitarCadastro.email,
-            role: dadosAceitarCadastro.role,
-            status: statusUsuario.indexOf(dadosAceitarCadastro.status),
-            cargo: dadosAceitarCadastro.cargo,
-            capitulo: dadosAceitarCadastro.capitulo,
-            password: dadosAceitarCadastro.password && hash,
-          }
+      const dadosAtualizados = {
+        nome: dadosAceitarCadastro.nome,
+        email: dadosAceitarCadastro.email,
+        role: dadosAceitarCadastro.role,
+        status: statusUsuario.indexOf(dadosAceitarCadastro.status),
+        cargo: dadosAceitarCadastro.cargo,
+        capitulo: dadosAceitarCadastro.capitulo,
+        password: dadosAceitarCadastro.password && (await Hash.make(<any>dadosAceitarCadastro.password)),
+      }
 
-          if (!dadosAtualizados.password) {
-            delete dadosAtualizados.password
-          }
+      if (!dadosAtualizados.password) {
+        delete dadosAtualizados.password
+      }
 
-          if (!dadosAtualizados.cargo) {
-            delete dadosAtualizados.cargo
-          }
+      if (!dadosAtualizados.cargo) {
+        delete dadosAtualizados.cargo
+      }
 
-          await Usuario.query().update(dadosAtualizados).where({ id: dadosAceitarCadastro.id })
+      await Usuario.query().update(dadosAtualizados).where({ id: dadosAceitarCadastro.id })
 
-          return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
-        } else {
-          throw { mensagem: 'Erro ao criar usuário', code: 'err_0041' }
-        }
-      })
+      return response.ok({ mensagem: 'Status de usuário alterado com sucesso!' })
     } catch (error) {
       const [rule, field] = getRuleError(error)
 
