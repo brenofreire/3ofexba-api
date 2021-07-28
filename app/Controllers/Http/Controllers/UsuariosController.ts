@@ -74,9 +74,6 @@ export default class UsuariosController {
         throw { mensagem: 'Credenciais incorretas' }
       }
     } catch (error) {
-      if (error && error.mensagem) {
-        return response.forbidden({ mensagem: error.mensagem, code: 'err_0004' })
-      }
       try {
         const [rule, field] = getRuleError(error)
         if (rule === 'minLength' || rule === 'required') {
@@ -96,12 +93,7 @@ export default class UsuariosController {
       schema: schema.create({
         id: schema.number(),
         nome: schema.string(),
-        email: schema.string({}, [
-          rules.exists({
-            table: 'usuarios',
-            column: 'email',
-          }),
-        ]),
+        email: schema.string.optional(),
         role: schema.enum(rolesEnum),
         status: schema.enum(statusUsuario),
         cargo: schema.string.optional(),

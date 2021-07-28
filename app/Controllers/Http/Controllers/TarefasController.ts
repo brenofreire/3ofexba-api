@@ -310,6 +310,8 @@ export default class TarefasController {
       const dadosToUpdate = JSON.parse(
         JSON.stringify({
           ...dadosTarefa,
+          data_entrega: moment(dadosTarefa.data_entrega).format('YYYY-MM-DD'),
+          data_final_semestre: moment(dadosTarefa.data_final_semestre).format('YYYY-MM-DD'),
           slug: undefined,
         })
       )
