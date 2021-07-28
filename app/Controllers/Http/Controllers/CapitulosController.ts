@@ -134,4 +134,21 @@ export default class CapitulosController {
       })
     }
   }
+
+  async deletarCapitulo({ request, response }: HttpContextContract) {
+    try {
+      const capitulo: Capitulo = request.input('capitulo')
+
+      const deleteCapitulo = await Capitulo.query().where({ id: capitulo.id }).del()
+
+      return response.ok(deleteCapitulo)
+    } catch (error) {
+      console.log(error)
+
+      return response.internalServerError({
+        mensagem: 'Erro ao deletar capítulo',
+        code: 'err_0041',
+      })
+    }
+  }
 }

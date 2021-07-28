@@ -54,6 +54,7 @@ Route.group(() => {
     Route.post('todos', 'Controllers/CapitulosController.buscarTodosCapitulos')
     Route.get('', 'Controllers/CapitulosController.buscarCapitulo').middleware('authRegional')
     Route.post('', 'Controllers/CapitulosController.cadastrarEditarCapitulo').middleware('authAdmin')
+    Route.post('deletar', 'Controllers/CapitulosController.deletarCapitulo').middleware('authAdmin')
   })
     .middleware(['authUser'])
     .prefix('capitulos')
