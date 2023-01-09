@@ -28,7 +28,7 @@
     "@adonisjs/lucid": "^9.0.3",
     "@adonisjs/repl": "^1.1.5",
     "jsonwebtoken": "^8.5.1",
-    "luxon": "^1.25.0",
+    "luxon": "^1.28.1",
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "pg": "^8.5.1",
