@@ -25,7 +25,7 @@
   "dependencies": {
     "@adonisjs/core": "^5.0.4-preview-rc-2",
     "@adonisjs/hash": "^6.0.7",
-    "@adonisjs/lucid": "^9.0.3",
+    "@adonisjs/lucid": "^18.3.0",
     "@adonisjs/repl": "^1.1.5",
     "jsonwebtoken": "^8.5.1",
     "luxon": "^1.25.0",
